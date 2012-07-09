@@ -34,7 +34,7 @@
  * #L%
  */
 
-package loci.formats.gui;
+package ome.scifio.util;
 
 import java.awt.Component;
 import java.awt.Container;
@@ -71,14 +71,9 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.util.Hashtable;
 
-import loci.common.DataTools;
-import loci.formats.FormatException;
-import loci.formats.FormatTools;
-import loci.formats.IFormatReader;
-import loci.formats.ImageTools;
-import loci.formats.MetadataTools;
-import loci.formats.meta.MetadataRetrieve;
-import ome.xml.model.primitives.PositiveInteger;
+import ome.scifio.FormatException;
+import ome.scifio.Reader;
+import ome.scifio.common.DataTools;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +83,7 @@ import org.slf4j.LoggerFactory;
  * in {@link java.awt.image.BufferedImage} form.
  *
  * To work with images in primitive array form,
- * use the {@link loci.formats.ImageTools} class.
+ * use the {@link ome.scifio.util.ImageTools} class.
  *
  * Much code was stolen and adapted from
  * <a href="http://forum.java.sun.com/thread.jspa?threadID=522483">
@@ -113,7 +108,8 @@ public final class AWTImageTools {
 
   // -- Constructor --
 
-  private AWTImageTools() { }
+  private AWTImageTools() {
+  }
 
   // -- Image construction - from 1D (single channel) data arrays --
 
@@ -126,8 +122,8 @@ public final class AWTImageTools {
    * @param signed Whether the byte values should be treated as signed
    *   (-128 to 127) instead of unsigned (0 to 255).
    */
-  public static BufferedImage makeImage(byte[] data,
-    int w, int h, boolean signed)
+  public static BufferedImage makeImage(byte[] data, int w, int h,
+    boolean signed)
   {
     return makeImage(new byte[][] {data}, w, h, signed);
   }
@@ -141,8 +137,8 @@ public final class AWTImageTools {
    * @param signed Whether the short values should be treated as signed
    *   (-32768 to 32767) instead of unsigned (0 to 65535).
    */
-  public static BufferedImage makeImage(short[] data,
-    int w, int h, boolean signed)
+  public static BufferedImage makeImage(short[] data, int w, int h,
+    boolean signed)
   {
     return makeImage(new short[][] {data}, w, h, signed);
   }
@@ -156,8 +152,7 @@ public final class AWTImageTools {
    * @param signed Whether the int values should be treated as signed
    *   (-2^31 to 2^31-1) instead of unsigned (0 to 2^32-1).
    */
-  public static BufferedImage makeImage(int[] data,
-    int w, int h, boolean signed)
+  public static BufferedImage makeImage(int[] data, int w, int h, boolean signed)
   {
     return makeImage(new int[][] {data}, w, h, signed);
   }
@@ -200,8 +195,8 @@ public final class AWTImageTools {
    * @param signed Whether the byte values should be treated as signed
    *   (-128 to 127) instead of unsigned (0 to 255).
    */
-  public static BufferedImage makeImage(byte[] data,
-    int w, int h, int c, boolean interleaved, boolean signed)
+  public static BufferedImage makeImage(byte[] data, int w, int h, int c,
+    boolean interleaved, boolean signed)
   {
     if (c == 1) return makeImage(data, w, h, signed);
     if (c > 2) return makeRGBImage(data, c, w, h, interleaved);
@@ -231,8 +226,8 @@ public final class AWTImageTools {
    * @param signed Whether the short values should be treated as signed
    *   (-32768 to 32767) instead of unsigned (0 to 65535).
    */
-  public static BufferedImage makeImage(short[] data,
-    int w, int h, int c, boolean interleaved, boolean signed)
+  public static BufferedImage makeImage(short[] data, int w, int h, int c,
+    boolean interleaved, boolean signed)
   {
     if (c == 1) return makeImage(data, w, h, signed);
     int dataType;
@@ -262,8 +257,8 @@ public final class AWTImageTools {
    * @param signed Whether the int values should be treated as signed
    *   (-2^31 to 2^31-1) instead of unsigned (0 to 2^32-1).
    */
-  public static BufferedImage makeImage(int[] data,
-    int w, int h, int c, boolean interleaved, boolean signed)
+  public static BufferedImage makeImage(int[] data, int w, int h, int c,
+    boolean interleaved, boolean signed)
   {
     if (c == 1) return makeImage(data, w, h, signed);
     int dataType = DataBuffer.TYPE_INT;
@@ -289,8 +284,8 @@ public final class AWTImageTools {
    *   For example, for RGB data, the pattern "RGBRGBRGB..." is interleaved,
    *   while "RRR...GGG...BBB..." is sequential.
    */
-  public static BufferedImage makeImage(float[] data,
-    int w, int h, int c, boolean interleaved)
+  public static BufferedImage makeImage(float[] data, int w, int h, int c,
+    boolean interleaved)
   {
     if (c == 1) return makeImage(data, w, h);
     int dataType = DataBuffer.TYPE_FLOAT;
@@ -310,8 +305,8 @@ public final class AWTImageTools {
    *   For example, for RGB data, the pattern "RGBRGBRGB..." is interleaved,
    *   while "RRR...GGG...BBB..." is sequential.
    */
-  public static BufferedImage makeImage(double[] data,
-    int w, int h, int c, boolean interleaved)
+  public static BufferedImage makeImage(double[] data, int w, int h, int c,
+    boolean interleaved)
   {
     if (c == 1) return makeImage(data, w, h);
     int dataType = DataBuffer.TYPE_DOUBLE;
@@ -332,8 +327,8 @@ public final class AWTImageTools {
    * @param signed Whether the byte values should be treated as signed
    *   (-128 to 127) instead of unsigned (0 to 255).
    */
-  public static BufferedImage makeImage(byte[][] data,
-    int w, int h, boolean signed)
+  public static BufferedImage makeImage(byte[][] data, int w, int h,
+    boolean signed)
   {
     if (data.length > 2) return makeRGBImage(data, w, h);
     int dataType;
@@ -359,8 +354,8 @@ public final class AWTImageTools {
    * @param signed Whether the short values should be treated as signed
    *   (-32768 to 32767) instead of unsigned (0 to 65535).
    */
-  public static BufferedImage makeImage(short[][] data,
-    int w, int h, boolean signed)
+  public static BufferedImage makeImage(short[][] data, int w, int h,
+    boolean signed)
   {
     int dataType;
     DataBuffer buffer;
@@ -386,8 +381,8 @@ public final class AWTImageTools {
    * @param signed Whether the int values should be treated as signed
    *   (-2^31 to 2^31-1) instead of unsigned (0 to 2^32-1).
    */
-  public static BufferedImage makeImage(int[][] data,
-    int w, int h, boolean signed)
+  public static BufferedImage makeImage(int[][] data, int w, int h,
+    boolean signed)
   {
     int dataType = DataBuffer.TYPE_INT;
     DataBuffer buffer;
@@ -444,6 +439,7 @@ public final class AWTImageTools {
    * @param meta Metadata object containing dimensional parameters.
    * @param series Relevant image series number of metadata object.
    */
+  /* TODO: MetadataRetrieve refactoring
   public static BufferedImage makeImage(byte[] data, boolean interleaved,
     MetadataRetrieve meta, int series) throws FormatException
   {
@@ -464,6 +460,7 @@ public final class AWTImageTools {
       FormatTools.isFloatingPoint(type), littleEndian,
       FormatTools.isSigned(type));
   }
+  /*
 
   /**
    * Creates an image from the given raw byte array,
@@ -487,8 +484,8 @@ public final class AWTImageTools {
   public static BufferedImage makeImage(byte[] data, int w, int h, int c,
     boolean interleaved, int bpp, boolean fp, boolean little, boolean signed)
   {
-    Object pixels = DataTools.makeDataArray(data,
-      bpp % 3 == 0 ? bpp / 3 : bpp, fp, little);
+    Object pixels =
+      DataTools.makeDataArray(data, bpp % 3 == 0 ? bpp / 3 : bpp, fp, little);
 
     if (pixels instanceof byte[]) {
       return makeImage((byte[]) pixels, w, h, c, interleaved, signed);
@@ -522,14 +519,15 @@ public final class AWTImageTools {
    * @param signed Whether the data values should be treated as signed
    *   instead of unsigned.
    */
-  public static BufferedImage makeImage(byte[][] data,
-    int w, int h, int bpp, boolean fp, boolean little, boolean signed)
+  public static BufferedImage makeImage(byte[][] data, int w, int h, int bpp,
+    boolean fp, boolean little, boolean signed)
   {
     int c = data.length;
     Object v = null;
-    for (int i=0; i<c; i++) {
-      Object pixels = DataTools.makeDataArray(data[i],
-        bpp % 3 == 0 ? bpp / 3 : bpp, fp, little);
+    for (int i = 0; i < c; i++) {
+      Object pixels =
+        DataTools.makeDataArray(
+          data[i], bpp % 3 == 0 ? bpp / 3 : bpp, fp, little);
       if (pixels instanceof byte[]) {
         if (v == null) v = new byte[c][];
         ((byte[][]) v)[i] = (byte[]) pixels;
@@ -576,13 +574,13 @@ public final class AWTImageTools {
     int[] buf = new int[data.length / c];
     int nBits = (cc - 1) * 8;
 
-    for (int i=0; i<buf.length; i++) {
-      for (int q=0; q<cc; q++) {
+    for (int i = 0; i < buf.length; i++) {
+      for (int q = 0; q < cc; q++) {
         if (interleaved) {
-          buf[i] |= ((data[i*c + q] & 0xff) << (nBits - q*8));
+          buf[i] |= ((data[i * c + q] & 0xff) << (nBits - q * 8));
         }
         else {
-          buf[i] |= ((data[q*buf.length + i] & 0xff) << (nBits - q*8));
+          buf[i] |= ((data[q * buf.length + i] & 0xff) << (nBits - q * 8));
         }
       }
     }
@@ -595,15 +593,15 @@ public final class AWTImageTools {
     int[] buf = new int[data[0].length];
     int nBits = (data.length - 1) * 8;
 
-    for (int i=0; i<buf.length; i++) {
-      for (int q=0; q<data.length; q++) {
-        buf[i] |= ((data[q][i] & 0xff) << (nBits - q*8));
+    for (int i = 0; i < buf.length; i++) {
+      for (int q = 0; q < data.length; q++) {
+        buf[i] |= ((data[q][i] & 0xff) << (nBits - q * 8));
       }
     }
 
     DataBuffer buffer = new DataBufferInt(buf, buf.length);
-    return constructImage(data.length, DataBuffer.TYPE_INT, w, h, false,
-      false, buffer);
+    return constructImage(
+      data.length, DataBuffer.TYPE_INT, w, h, false, false, buffer);
   }
 
   // -- Image construction - miscellaneous --
@@ -647,20 +645,20 @@ public final class AWTImageTools {
   }
 
   /** Creates an image with the given DataBuffer. */
-  public static BufferedImage constructImage(int c, int type, int w,
-    int h, boolean interleaved, boolean banded, DataBuffer buffer)
+  public static BufferedImage constructImage(int c, int type, int w, int h,
+    boolean interleaved, boolean banded, DataBuffer buffer)
   {
     return constructImage(c, type, w, h, interleaved, banded, buffer, null);
   }
 
   /** Creates an image with the given DataBuffer. */
-  public static BufferedImage constructImage(int c, int type, int w,
-    int h, boolean interleaved, boolean banded, DataBuffer buffer,
+  public static BufferedImage constructImage(int c, int type, int w, int h,
+    boolean interleaved, boolean banded, DataBuffer buffer,
     ColorModel colorModel)
   {
     if (c > 4) {
-      throw new IllegalArgumentException(
-        "Cannot construct image with " + c + " channels");
+      throw new IllegalArgumentException("Cannot construct image with " + c +
+        " channels");
     }
     if (colorModel == null) {
       colorModel = makeColorModel(c, type);
@@ -680,7 +678,7 @@ public final class AWTImageTools {
       !(buffer instanceof UnsignedIntBuffer))
     {
       int[] bitMasks = new int[c];
-      for (int i=0; i<c; i++) {
+      for (int i = 0; i < c; i++) {
         bitMasks[i] = 0xff << ((c - i - 1) * 8);
       }
       model =
@@ -689,13 +687,15 @@ public final class AWTImageTools {
     else if (banded) model = new BandedSampleModel(type, w, h, c);
     else if (interleaved) {
       int[] bandOffsets = new int[c];
-      for (int i=0; i<c; i++) bandOffsets[i] = i;
-      model = new PixelInterleavedSampleModel(type,
-        w, h, c, c * w, bandOffsets);
+      for (int i = 0; i < c; i++)
+        bandOffsets[i] = i;
+      model =
+        new PixelInterleavedSampleModel(type, w, h, c, c * w, bandOffsets);
     }
     else {
       int[] bandOffsets = new int[c];
-      for (int i=0; i<c; i++) bandOffsets[i] = i * w * h;
+      for (int i = 0; i < c; i++)
+        bandOffsets[i] = i * w * h;
       model = new ComponentSampleModel(type, w, h, 1, w, bandOffsets);
     }
 
@@ -720,8 +720,8 @@ public final class AWTImageTools {
         b.setData(raster);
       }
     }
-    else if (c > 2 && type == DataBuffer.TYPE_INT && buffer.getNumBanks() == 1
-      && !(buffer instanceof UnsignedIntBuffer))
+    else if (c > 2 && type == DataBuffer.TYPE_INT &&
+      buffer.getNumBanks() == 1 && !(buffer instanceof UnsignedIntBuffer))
     {
       if (c == 3) {
         b = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
@@ -740,17 +740,17 @@ public final class AWTImageTools {
 
   /**
    * Creates an image from the given byte array, using the given
-   * IFormatReader to retrieve additional information.
+   * ome.scifio.Reader to retrieve additional information.
    */
-  public static BufferedImage openImage(byte[] buf, IFormatReader r,
-    int w, int h) throws FormatException, IOException
+  public static BufferedImage openImage(byte[] buf, Reader r, int w, int h,
+    int no) throws FormatException, IOException
   {
-    int pixelType = r.getPixelType();
-    boolean little = r.isLittleEndian();
+    int pixelType = r.getCoreMetadata().getPixelType(no);
+    boolean little = r.getCoreMetadata().isLittleEndian(no);
     boolean normal = r.isNormalized();
-    int rgbChanCount = r.getRGBChannelCount();
-    boolean interleaved = r.isInterleaved();
-    boolean indexed = r.isIndexed();
+    int rgbChanCount = r.getCoreMetadata().getRGBChannelCount(no);
+    boolean interleaved = r.getCoreMetadata().isInterleaved(no);
+    boolean indexed = r.getCoreMetadata().isIndexed(no);
 
     if (pixelType == FormatTools.FLOAT) {
       float[] f = (float[]) DataTools.makeDataArray(buf, 4, true, little);
@@ -779,15 +779,16 @@ public final class AWTImageTools {
     }
 
     int bpp = FormatTools.getBytesPerPixel(pixelType);
-    BufferedImage b = makeImage(buf, w, h, rgbChanCount,
-      interleaved, bpp, false, little, signed);
+    BufferedImage b =
+      makeImage(
+        buf, w, h, rgbChanCount, interleaved, bpp, false, little, signed);
     if (b == null) {
       throw new FormatException("Could not construct BufferedImage");
     }
 
     if (indexed && rgbChanCount == 1) {
       if (pixelType == FormatTools.UINT8 || pixelType == FormatTools.INT8) {
-        byte[][] table = r.get8BitLookupTable();
+        byte[][] table = r.getCoreMetadata().get8BitLookupTable(no);
         if (table != null && table.length > 0 && table[0] != null) {
           int len = table[0].length;
           byte[] dummy = table.length < 3 ? new byte[len] : null;
@@ -800,17 +801,20 @@ public final class AWTImageTools {
       else if (pixelType == FormatTools.UINT16 ||
         pixelType == FormatTools.INT16)
       {
-        short[][] table = r.get16BitLookupTable();
+        short[][] table = r.getCoreMetadata().get16BitLookupTable(no);
         if (table != null && table.length > 0 && table[0] != null) {
-          model = new Index16ColorModel(16, table[0].length, table,
-            r.isLittleEndian());
+          model =
+            new Index16ColorModel(
+              16, table[0].length, table, r.getCoreMetadata()
+                .isLittleEndian(no));
         }
       }
     }
 
     if (model != null) {
-      WritableRaster raster = Raster.createWritableRaster(b.getSampleModel(),
-        b.getRaster().getDataBuffer(), null);
+      WritableRaster raster =
+        Raster.createWritableRaster(b.getSampleModel(), b.getRaster()
+          .getDataBuffer(), null);
       b = new BufferedImage(model, raster, false, null);
     }
 
@@ -834,8 +838,7 @@ public final class AWTImageTools {
    * The returned type will be either byte[][], short[][], int[][], float[][]
    * or double[][], depending on the image's transfer type.
    */
-  public static Object getPixels(BufferedImage image, int x, int y,
-    int w, int h)
+  public static Object getPixels(BufferedImage image, int x, int y, int w, int h)
   {
     WritableRaster raster = image.getRaster();
     return getPixels(raster, x, y, w, h);
@@ -855,8 +858,8 @@ public final class AWTImageTools {
    * The returned type will be either byte[][], short[][], int[][], float[][]
    * or double[][], depending on the raster's transfer type.
    */
-  public static Object getPixels(WritableRaster raster, int x, int y,
-    int w, int h)
+  public static Object getPixels(WritableRaster raster, int x, int y, int w,
+    int h)
   {
     int tt = raster.getTransferType();
     if (tt == DataBuffer.TYPE_BYTE) return getBytes(raster, x, y, w, h);
@@ -893,9 +896,10 @@ public final class AWTImageTools {
     int c = r.getNumBands();
     byte[][] samples = new byte[c][w * h];
     int[] buf = new int[w * h];
-    for (int i=0; i<c; i++) {
+    for (int i = 0; i < c; i++) {
       r.getSamples(x, y, w, h, i, buf);
-      for (int j=0; j<buf.length; j++) samples[i][j] = (byte) buf[j];
+      for (int j = 0; j < buf.length; j++)
+        samples[i][j] = (byte) buf[j];
     }
     return samples;
   }
@@ -912,11 +916,12 @@ public final class AWTImageTools {
   }
 
   /** Extracts pixel data as arrays of unsigned shorts, one per channel. */
-  public static short[][] getShorts(WritableRaster r, int x, int y,
-    int w, int h)
+  public static short[][] getShorts(WritableRaster r, int x, int y, int w, int h)
   {
-    if (canUseBankDataDirectly(r,
-      DataBuffer.TYPE_USHORT, DataBufferUShort.class) && x == 0 && y == 0 &&
+    if (canUseBankDataDirectly(
+      r, DataBuffer.TYPE_USHORT, DataBufferUShort.class) &&
+      x == 0 &&
+      y == 0 &&
       w == r.getWidth() && h == r.getHeight())
     {
       return ((DataBufferUShort) r.getDataBuffer()).getBankData();
@@ -924,9 +929,10 @@ public final class AWTImageTools {
     int c = r.getNumBands();
     short[][] samples = new short[c][w * h];
     int[] buf = new int[w * h];
-    for (int i=0; i<c; i++) {
+    for (int i = 0; i < c; i++) {
       r.getSamples(x, y, w, h, i, buf);
-      for (int j=0; j<buf.length; j++) samples[i][j] = (short) buf[j];
+      for (int j = 0; j < buf.length; j++)
+        samples[i][j] = (short) buf[j];
     }
     return samples;
   }
@@ -952,7 +958,8 @@ public final class AWTImageTools {
     // NB: an order of magnitude faster than the naive makeType solution
     int c = r.getNumBands();
     int[][] samples = new int[c][w * h];
-    for (int i=0; i<c; i++) r.getSamples(x, y, w, h, i, samples[i]);
+    for (int i = 0; i < c; i++)
+      r.getSamples(x, y, w, h, i, samples[i]);
     return samples;
   }
 
@@ -968,19 +975,18 @@ public final class AWTImageTools {
   }
 
   /** Extracts pixel data as arrays of floats, one per channel. */
-  public static float[][] getFloats(WritableRaster r, int x, int y,
-    int w, int h)
+  public static float[][] getFloats(WritableRaster r, int x, int y, int w, int h)
   {
-    if (canUseBankDataDirectly(r, DataBuffer.TYPE_FLOAT,
-      DataBufferFloat.class) && x == 0 && y == 0 && w == r.getWidth() &&
-      h == r.getHeight())
+    if (canUseBankDataDirectly(r, DataBuffer.TYPE_FLOAT, DataBufferFloat.class) &&
+      x == 0 && y == 0 && w == r.getWidth() && h == r.getHeight())
     {
       return ((DataBufferFloat) r.getDataBuffer()).getBankData();
     }
     // NB: an order of magnitude faster than the naive makeType solution
     int c = r.getNumBands();
     float[][] samples = new float[c][w * h];
-    for (int i=0; i<c; i++) r.getSamples(x, y, w, h, i, samples[i]);
+    for (int i = 0; i < c; i++)
+      r.getSamples(x, y, w, h, i, samples[i]);
     return samples;
   }
 
@@ -996,11 +1002,13 @@ public final class AWTImageTools {
   }
 
   /** Extracts pixel data as arrays of doubles, one per channel. */
-  public static double[][] getDoubles(WritableRaster r, int x, int y,
-    int w, int h)
+  public static double[][] getDoubles(WritableRaster r, int x, int y, int w,
+    int h)
   {
-    if (canUseBankDataDirectly(r,
-      DataBuffer.TYPE_DOUBLE, DataBufferDouble.class) && x == 0 && y == 0 &&
+    if (canUseBankDataDirectly(
+      r, DataBuffer.TYPE_DOUBLE, DataBufferDouble.class) &&
+      x == 0 &&
+      y == 0 &&
       w == r.getWidth() && h == r.getHeight())
     {
       return ((DataBufferDouble) r.getDataBuffer()).getBankData();
@@ -1008,7 +1016,8 @@ public final class AWTImageTools {
     // NB: an order of magnitude faster than the naive makeType solution
     int c = r.getNumBands();
     double[][] samples = new double[c][w * h];
-    for (int i=0; i<c; i++) r.getSamples(x, y, w, h, i, samples[i]);
+    for (int i = 0; i < c; i++)
+      r.getSamples(x, y, w, h, i, samples[i]);
     return samples;
   }
 
@@ -1034,10 +1043,10 @@ public final class AWTImageTools {
     int c = r.getNumBands();
     int[] bandOffsets = csm.getBandOffsets();
     if (bandOffsets.length != c) return false;
-    for (int i=0; i<bandOffsets.length; i++) {
+    for (int i = 0; i < bandOffsets.length; i++) {
       if (bandOffsets[i] != 0) return false;
     }
-    for (int i=0; i<bandOffsets.length; i++) {
+    for (int i = 0; i < bandOffsets.length; i++) {
       if (bandOffsets[i] != i) return false;
     }
     return true;
@@ -1085,8 +1094,8 @@ public final class AWTImageTools {
     else if (pixels instanceof short[][]) {
       short[][] s = (short[][]) pixels;
       pixelBytes = new byte[s.length][s[0].length * 2];
-      for (int i=0; i<pixelBytes.length; i++) {
-        for (int j=0; j<s[0].length; j++) {
+      for (int i = 0; i < pixelBytes.length; i++) {
+        for (int j = 0; j < s[0].length; j++) {
           DataTools.unpackBytes(s[i][j], pixelBytes[i], j * 2, 2, little);
         }
       }
@@ -1099,8 +1108,8 @@ public final class AWTImageTools {
         imageType == BufferedImage.TYPE_INT_ARGB)
       {
         pixelBytes = new byte[in.length][in[0].length];
-        for (int c=0; c<in.length; c++) {
-          for (int i=0; i<in[0].length; i++) {
+        for (int c = 0; c < in.length; c++) {
+          for (int i = 0; i < in[0].length; i++) {
             if (imageType != BufferedImage.TYPE_INT_BGR) {
               pixelBytes[c][i] = (byte) (in[c][i] & 0xff);
             }
@@ -1112,8 +1121,8 @@ public final class AWTImageTools {
       }
       else {
         pixelBytes = new byte[in.length][in[0].length * 4];
-        for (int i=0; i<pixelBytes.length; i++) {
-          for (int j=0; j<in[0].length; j++) {
+        for (int i = 0; i < pixelBytes.length; i++) {
+          for (int j = 0; j < in[0].length; j++) {
             DataTools.unpackBytes(in[i][j], pixelBytes[i], j * 4, 4, little);
           }
         }
@@ -1122,8 +1131,8 @@ public final class AWTImageTools {
     else if (pixels instanceof float[][]) {
       float[][] in = (float[][]) pixels;
       pixelBytes = new byte[in.length][in[0].length * 4];
-      for (int i=0; i<pixelBytes.length; i++) {
-        for (int j=0; j<in[0].length; j++) {
+      for (int i = 0; i < pixelBytes.length; i++) {
+        for (int j = 0; j < in[0].length; j++) {
           int v = Float.floatToIntBits(in[i][j]);
           DataTools.unpackBytes(v, pixelBytes[i], j * 4, 4, little);
         }
@@ -1132,8 +1141,8 @@ public final class AWTImageTools {
     else if (pixels instanceof double[][]) {
       double[][] in = (double[][]) pixels;
       pixelBytes = new byte[in.length][in[0].length * 8];
-      for (int i=0; i<pixelBytes.length; i++) {
-        for (int j=0; j<in[0].length; j++) {
+      for (int i = 0; i < pixelBytes.length; i++) {
+        for (int j = 0; j < in[0].length; j++) {
           long v = Double.doubleToLongBits(in[i][j]);
           DataTools.unpackBytes(v, pixelBytes[i], j * 8, 8, little);
         }
@@ -1150,8 +1159,8 @@ public final class AWTImageTools {
    * are given an image with 16-bit data, each channel of the resulting array
    * will have width * height * 2 bytes.
    */
-  public static byte[][] getPixelBytes(WritableRaster r, boolean little,
-    int x, int y, int w, int h)
+  public static byte[][] getPixelBytes(WritableRaster r, boolean little, int x,
+    int y, int w, int h)
   {
     Object pixels = getPixels(r);
     byte[][] pixelBytes = null;
@@ -1165,8 +1174,8 @@ public final class AWTImageTools {
       bpp = 2;
       short[][] s = (short[][]) pixels;
       pixelBytes = new byte[s.length][s[0].length * bpp];
-      for (int i=0; i<pixelBytes.length; i++) {
-        for (int j=0; j<s[0].length; j++) {
+      for (int i = 0; i < pixelBytes.length; i++) {
+        for (int j = 0; j < s[0].length; j++) {
           DataTools.unpackBytes(s[i][j], pixelBytes[i], j * bpp, bpp, little);
         }
       }
@@ -1176,8 +1185,8 @@ public final class AWTImageTools {
       int[][] in = (int[][]) pixels;
 
       pixelBytes = new byte[in.length][in[0].length * bpp];
-      for (int i=0; i<pixelBytes.length; i++) {
-        for (int j=0; j<in[0].length; j++) {
+      for (int i = 0; i < pixelBytes.length; i++) {
+        for (int j = 0; j < in[0].length; j++) {
           DataTools.unpackBytes(in[i][j], pixelBytes[i], j * bpp, bpp, little);
         }
       }
@@ -1186,8 +1195,8 @@ public final class AWTImageTools {
       bpp = 4;
       float[][] in = (float[][]) pixels;
       pixelBytes = new byte[in.length][in[0].length * bpp];
-      for (int i=0; i<pixelBytes.length; i++) {
-        for (int j=0; j<in[0].length; j++) {
+      for (int i = 0; i < pixelBytes.length; i++) {
+        for (int j = 0; j < in[0].length; j++) {
           int v = Float.floatToIntBits(in[i][j]);
           DataTools.unpackBytes(v, pixelBytes[i], j * bpp, bpp, little);
         }
@@ -1197,8 +1206,8 @@ public final class AWTImageTools {
       bpp = 8;
       double[][] in = (double[][]) pixels;
       pixelBytes = new byte[in.length][in[0].length * bpp];
-      for (int i=0; i<pixelBytes.length; i++) {
-        for (int j=0; j<in[0].length; j++) {
+      for (int i = 0; i < pixelBytes.length; i++) {
+        for (int j = 0; j < in[0].length; j++) {
           long v = Double.doubleToLongBits(in[i][j]);
           DataTools.unpackBytes(v, pixelBytes[i], j * bpp, bpp, little);
         }
@@ -1210,8 +1219,8 @@ public final class AWTImageTools {
     }
 
     byte[][] croppedBytes = new byte[pixelBytes.length][w * h * bpp];
-    for (int c=0; c<croppedBytes.length; c++) {
-      for (int row=0; row<h; row++) {
+    for (int c = 0; c < croppedBytes.length; c++) {
+      for (int row = 0; row < h; row++) {
         int src = (row + y) * r.getWidth() * bpp + x * bpp;
         int dest = row * w * bpp;
         System.arraycopy(pixelBytes[c], src, croppedBytes[c], dest, w * bpp);
@@ -1219,7 +1228,6 @@ public final class AWTImageTools {
     }
     return croppedBytes;
   }
-
 
   /**
    * Gets the pixel type of the given image.
@@ -1336,12 +1344,12 @@ public final class AWTImageTools {
     Hashtable<String, Object> properties = new Hashtable<String, Object>();
     String[] keys = img.getPropertyNames();
     if (keys != null) {
-      for (int i=0; i<keys.length; i++) {
+      for (int i = 0; i < keys.length; i++) {
         properties.put(keys[i], img.getProperty(keys[i]));
       }
     }
-    BufferedImage result = new BufferedImage(cm,
-      raster, isAlphaPremultiplied, properties);
+    BufferedImage result =
+      new BufferedImage(cm, raster, isAlphaPremultiplied, properties);
     img.copyData(raster);
     return result;
   }
@@ -1352,7 +1360,7 @@ public final class AWTImageTools {
     if (separated || p.length == 1) return p[0];
 
     byte[] rtn = new byte[p.length * p[0].length];
-    for (int i=0; i<p.length; i++) {
+    for (int i = 0; i < p.length; i++) {
       System.arraycopy(p[i], 0, rtn, i * p[0].length, p[i].length);
     }
     return rtn;
@@ -1371,8 +1379,8 @@ public final class AWTImageTools {
     int bpp = FormatTools.getBytesPerPixel(pixelType);
 
     byte[][] pix = getPixelBytes(img, false);
-    return makeImage(pix, img.getWidth(), img.getHeight(),
-      bpp, fp, false, false);
+    return makeImage(
+      pix, img.getWidth(), img.getHeight(), bpp, fp, false, false);
   }
 
   // -- Image manipulation --
@@ -1383,7 +1391,8 @@ public final class AWTImageTools {
   {
     int pixelType = getPixelType(image);
     byte[][] pix = getPixelBytes(image, littleEndian, x, y, w, h);
-    return makeImage(pix, w, h, FormatTools.getBytesPerPixel(pixelType),
+    return makeImage(
+      pix, w, h, FormatTools.getBytesPerPixel(pixelType),
       FormatTools.isFloatingPoint(pixelType), littleEndian,
       FormatTools.isSigned(pixelType));
   }
@@ -1401,23 +1410,28 @@ public final class AWTImageTools {
     boolean signed = FormatTools.isSigned(pixelType);
     if (o instanceof byte[][]) {
       byte[][] pix = (byte[][]) o;
-      for (int i=0; i<c; i++) results[i] = makeImage(pix[i], w, h, signed);
+      for (int i = 0; i < c; i++)
+        results[i] = makeImage(pix[i], w, h, signed);
     }
     else if (o instanceof short[][]) {
       short[][] pix = (short[][]) o;
-      for (int i=0; i<c; i++) results[i] = makeImage(pix[i], w, h, signed);
+      for (int i = 0; i < c; i++)
+        results[i] = makeImage(pix[i], w, h, signed);
     }
     else if (o instanceof int[][]) {
       int[][] pix = (int[][]) o;
-      for (int i=0; i<c; i++) results[i] = makeImage(pix[i], w, h, signed);
+      for (int i = 0; i < c; i++)
+        results[i] = makeImage(pix[i], w, h, signed);
     }
     else if (o instanceof float[][]) {
       float[][] pix = (float[][]) o;
-      for (int i=0; i<c; i++) results[i] = makeImage(pix[i], w, h);
+      for (int i = 0; i < c; i++)
+        results[i] = makeImage(pix[i], w, h);
     }
     else if (o instanceof double[][]) {
       double[][] pix = (double[][]) o;
-      for (int i=0; i<c; i++) results[i] = makeImage(pix[i], w, h);
+      for (int i = 0; i < c; i++)
+        results[i] = makeImage(pix[i], w, h);
     }
 
     return results;
@@ -1430,7 +1444,7 @@ public final class AWTImageTools {
     // create list of pixels arrays
     Object[] list = new Object[images.length];
     int c = 0, type = 0;
-    for (int i=0; i<images.length; i++) {
+    for (int i = 0; i < images.length; i++) {
       Object o = getPixels(images[i]);
       if (o instanceof byte[][]) {
         if (i == 0) type = DataBuffer.TYPE_BYTE;
@@ -1469,51 +1483,61 @@ public final class AWTImageTools {
     if (type == DataBuffer.TYPE_BYTE) {
       byte[][] pix = new byte[c][];
       int ndx = 0;
-      for (int i=0; i<list.length; i++) {
+      for (int i = 0; i < list.length; i++) {
         byte[][] b = (byte[][]) list[i];
-        for (int j=0; j<b.length; j++) pix[ndx++] = b[j];
+        for (int j = 0; j < b.length; j++)
+          pix[ndx++] = b[j];
       }
-      while (ndx < pix.length) pix[ndx++] = new byte[w * h]; // blank channel
+      while (ndx < pix.length)
+        pix[ndx++] = new byte[w * h]; // blank channel
       return makeImage(pix, w, h, signed);
     }
     if (type == DataBuffer.TYPE_USHORT || type == DataBuffer.TYPE_SHORT) {
       short[][] pix = new short[c][];
       int ndx = 0;
-      for (int i=0; i<list.length; i++) {
+      for (int i = 0; i < list.length; i++) {
         short[][] b = (short[][]) list[i];
-        for (int j=0; j<b.length; j++) pix[ndx++] = b[j];
+        for (int j = 0; j < b.length; j++)
+          pix[ndx++] = b[j];
       }
-      while (ndx < pix.length) pix[ndx++] = new short[w * h]; // blank channel
+      while (ndx < pix.length)
+        pix[ndx++] = new short[w * h]; // blank channel
       return makeImage(pix, w, h, signed);
     }
     if (type == DataBuffer.TYPE_INT) {
       int[][] pix = new int[c][];
       int ndx = 0;
-      for (int i=0; i<list.length; i++) {
+      for (int i = 0; i < list.length; i++) {
         int[][] b = (int[][]) list[i];
-        for (int j=0; j<b.length; j++) pix[ndx++] = b[j];
+        for (int j = 0; j < b.length; j++)
+          pix[ndx++] = b[j];
       }
-      while (ndx < pix.length) pix[ndx++] = new int[w * h]; // blank channel
+      while (ndx < pix.length)
+        pix[ndx++] = new int[w * h]; // blank channel
       return makeImage(pix, w, h, signed);
     }
     if (type == DataBuffer.TYPE_FLOAT) {
       float[][] pix = new float[c][];
       int ndx = 0;
-      for (int i=0; i<list.length; i++) {
+      for (int i = 0; i < list.length; i++) {
         float[][] b = (float[][]) list[i];
-        for (int j=0; j<b.length; j++) pix[ndx++] = b[j];
+        for (int j = 0; j < b.length; j++)
+          pix[ndx++] = b[j];
       }
-      while (ndx < pix.length) pix[ndx++] = new float[w * h]; // blank channel
+      while (ndx < pix.length)
+        pix[ndx++] = new float[w * h]; // blank channel
       return makeImage(pix, w, h);
     }
     if (type == DataBuffer.TYPE_DOUBLE) {
       double[][] pix = new double[c][];
       int ndx = 0;
-      for (int i=0; i<list.length; i++) {
+      for (int i = 0; i < list.length; i++) {
         double[][] b = (double[][]) list[i];
-        for (int j=0; j<b.length; j++) pix[ndx++] = b[j];
+        for (int j = 0; j < b.length; j++)
+          pix[ndx++] = b[j];
       }
-      while (ndx < pix.length) pix[ndx++] = new double[w * h]; // blank channel
+      while (ndx < pix.length)
+        pix[ndx++] = new double[w * h]; // blank channel
       return makeImage(pix, w, h);
     }
 
@@ -1541,16 +1565,16 @@ public final class AWTImageTools {
       if (pixels instanceof byte[][]) {
         byte[][] b = (byte[][]) pixels;
         byte[][] newBytes = new byte[b.length][width * height];
-        for (int i=0; i<b.length; i++) {
-          newBytes[i] = ImageTools.padImage(b[i],
-            false, 1, img.getWidth(), width, height);
+        for (int i = 0; i < b.length; i++) {
+          newBytes[i] =
+            ImageTools.padImage(b[i], false, 1, img.getWidth(), width, height);
         }
         return makeImage(newBytes, width, height, signed);
       }
       else if (pixels instanceof short[][]) {
         short[][] b = (short[][]) pixels;
         short[][] newShorts = new short[b.length][width * height];
-        for (int i=0; i<b.length; i++) {
+        for (int i = 0; i < b.length; i++) {
           newShorts[i] =
             ImageTools.padImage(b[i], false, 1, img.getWidth(), width, height);
         }
@@ -1559,16 +1583,16 @@ public final class AWTImageTools {
       else if (pixels instanceof int[][]) {
         int[][] b = (int[][]) pixels;
         int[][] newInts = new int[b.length][width * height];
-        for (int i=0; i<b.length; i++) {
-          newInts[i] = ImageTools.padImage(b[i],
-            false, 1, img.getWidth(), width, height);
+        for (int i = 0; i < b.length; i++) {
+          newInts[i] =
+            ImageTools.padImage(b[i], false, 1, img.getWidth(), width, height);
         }
         return makeImage(newInts, width, height, signed);
       }
       else if (pixels instanceof float[][]) {
         float[][] b = (float[][]) pixels;
         float[][] newFloats = new float[b.length][width * height];
-        for (int i=0; i<b.length; i++) {
+        for (int i = 0; i < b.length; i++) {
           newFloats[i] =
             ImageTools.padImage(b[i], false, 1, img.getWidth(), width, height);
         }
@@ -1577,7 +1601,7 @@ public final class AWTImageTools {
       else if (pixels instanceof double[][]) {
         double[][] b = (double[][]) pixels;
         double[][] newDoubles = new double[b.length][width * height];
-        for (int i=0; i<b.length; i++) {
+        for (int i = 0; i < b.length; i++) {
           newDoubles[i] =
             ImageTools.padImage(b[i], false, 1, img.getWidth(), width, height);
         }
@@ -1594,7 +1618,7 @@ public final class AWTImageTools {
     double min = Double.MAX_VALUE;
     double max = 0.0;
     int bits = pixels[0].length / (img.getWidth() * img.getHeight()) * 8;
-    for (int i=0; i<pixels.length; i++) {
+    for (int i = 0; i < pixels.length; i++) {
       Double[] mm = ImageTools.scanData(pixels[0], bits, true);
       double tmin = mm[0].doubleValue();
       double tmax = mm[1].doubleValue();
@@ -1620,8 +1644,8 @@ public final class AWTImageTools {
       short[][] shorts = (short[][]) pixels;
       byte[][] out = new byte[shorts.length][shorts[0].length];
 
-      for (int i=0; i<out.length; i++) {
-        for (int j=0; j<out[i].length; j++) {
+      for (int i = 0; i < out.length; i++) {
+        for (int j = 0; j < out[i].length; j++) {
           if (shorts[i][j] < 0) shorts[i][j] += 32767;
 
           int diff = max - min;
@@ -1639,8 +1663,8 @@ public final class AWTImageTools {
       int[][] ints = (int[][]) pixels;
       byte[][] out = new byte[ints.length][ints[0].length];
 
-      for (int i=0; i<out.length; i++) {
-        for (int j=0; j<out[i].length; j++) {
+      for (int i = 0; i < out.length; i++) {
+        for (int j = 0; j < out[i].length; j++) {
           if (ints[i][j] >= max) out[i][j] = (byte) 255;
           else if (ints[i][j] <= min) out[i][j] = 0;
           else {
@@ -1657,8 +1681,8 @@ public final class AWTImageTools {
       float[][] floats = (float[][]) pixels;
       byte[][] out = new byte[floats.length][floats[0].length];
 
-      for (int i=0; i<out.length; i++) {
-        for (int j=0; j<out[i].length; j++) {
+      for (int i = 0; i < out.length; i++) {
+        for (int j = 0; j < out[i].length; j++) {
           if (floats[i][j] >= max) out[i][j] = (byte) 255;
           else if (floats[i][j] <= min) out[i][j] = 0;
           else {
@@ -1675,8 +1699,8 @@ public final class AWTImageTools {
       double[][] doubles = (double[][]) pixels;
       byte[][] out = new byte[doubles.length][doubles[0].length];
 
-      for (int i=0; i<out.length; i++) {
-        for (int j=0; j<out[i].length; j++) {
+      for (int i = 0; i < out.length; i++) {
+        for (int j = 0; j < out[i].length; j++) {
           if (doubles[i][j] >= max) out[i][j] = (byte) 255;
           else if (doubles[i][j] <= min) out[i][j] = 0;
           else {
@@ -1713,31 +1737,31 @@ public final class AWTImageTools {
    * Scales the image using the Java2D API, with the resultant
    * image optimized for the given graphics configuration.
    */
-  public static BufferedImage scale2D(BufferedImage image,
-    int width, int height, Object hint, GraphicsConfiguration gc)
+  public static BufferedImage scale2D(BufferedImage image, int width,
+    int height, Object hint, GraphicsConfiguration gc)
   {
     if (gc == null) gc = getDefaultConfiguration();
     int trans = image.getColorModel().getTransparency();
-    return copyScaled(image,
-      gc.createCompatibleImage(width, height, trans), hint);
+    return copyScaled(
+      image, gc.createCompatibleImage(width, height, trans), hint);
   }
 
   /**
    * Scales the image using the Java2D API, with the
    * resultant image having the given color model.
    */
-  public static BufferedImage scale2D(BufferedImage image,
-    int width, int height, Object hint, ColorModel cm)
+  public static BufferedImage scale2D(BufferedImage image, int width,
+    int height, Object hint, ColorModel cm)
   {
     WritableRaster raster = cm.createCompatibleWritableRaster(width, height);
     boolean isRasterPremultiplied = cm.isAlphaPremultiplied();
-    return copyScaled(image, new BufferedImage(cm,
-      raster, isRasterPremultiplied, null), hint);
+    return copyScaled(image, new BufferedImage(
+      cm, raster, isRasterPremultiplied, null), hint);
   }
 
   /** Scales the image using the AWT Image API. */
-  public static Image scaleAWT(BufferedImage source, int width,
-    int height, int hint)
+  public static Image scaleAWT(BufferedImage source, int width, int height,
+    int hint)
   {
     return source.getScaledInstance(width, height, hint);
   }
@@ -1746,8 +1770,8 @@ public final class AWTImageTools {
    * Scales the image using the most appropriate API, with the resultant image
    * having the same color model as the original image.
    */
-  public static BufferedImage scale(BufferedImage source,
-    int width, int height, boolean pad)
+  public static BufferedImage scale(BufferedImage source, int width,
+    int height, boolean pad)
   {
     int w = source.getWidth();
     int h = source.getHeight();
@@ -1778,8 +1802,8 @@ public final class AWTImageTools {
       (sourceModel instanceof SignedColorModel))
     {
       DataBuffer buffer = source.getData().getDataBuffer();
-      WritableRaster raster = Raster.createWritableRaster(
-        source.getSampleModel(), buffer, null);
+      WritableRaster raster =
+        Raster.createWritableRaster(source.getSampleModel(), buffer, null);
 
       ColorModel model = makeColorModel(1, buffer.getDataType());
       if (sourceModel instanceof SignedColorModel) {
@@ -1791,8 +1815,9 @@ public final class AWTImageTools {
         scaleAWT(source, width, height, Image.SCALE_AREA_AVERAGING);
       result = makeBuffered(scaled, sourceModel);
 
-      raster = Raster.createWritableRaster(result.getSampleModel(),
-        result.getData().getDataBuffer(), null);
+      raster =
+        Raster.createWritableRaster(result.getSampleModel(), result.getData()
+          .getDataBuffer(), null);
       result = new BufferedImage(sourceModel, raster, false, null);
     }
     else {
@@ -1818,8 +1843,9 @@ public final class AWTImageTools {
 
     // TODO: better way to handle color model (don't just assume RGB)
     loadImage(image);
-    BufferedImage img = new BufferedImage(image.getWidth(OBS),
-      image.getHeight(OBS), BufferedImage.TYPE_INT_RGB);
+    BufferedImage img =
+      new BufferedImage(
+        image.getWidth(OBS), image.getHeight(OBS), BufferedImage.TYPE_INT_RGB);
     Graphics g = img.getGraphics();
     g.drawImage(image, 0, 0, OBS);
     g.dispose();
@@ -1842,8 +1868,8 @@ public final class AWTImageTools {
     int w = image.getWidth(OBS), h = image.getHeight(OBS);
     boolean alphaPremultiplied = cm.isAlphaPremultiplied();
     WritableRaster raster = cm.createCompatibleWritableRaster(w, h);
-    BufferedImage result = new BufferedImage(cm,
-      raster, alphaPremultiplied, null);
+    BufferedImage result =
+      new BufferedImage(cm, raster, alphaPremultiplied, null);
     Graphics2D g = result.createGraphics();
     g.drawImage(image, 0, 0, OBS);
     g.dispose();
@@ -1855,8 +1881,12 @@ public final class AWTImageTools {
     if (image instanceof BufferedImage) return true;
     MediaTracker tracker = new MediaTracker(OBS);
     tracker.addImage(image, 0);
-    try { tracker.waitForID(0); }
-    catch (InterruptedException exc) { return false; }
+    try {
+      tracker.waitForID(0);
+    }
+    catch (InterruptedException exc) {
+      return false;
+    }
     if (MediaTracker.COMPLETE != tracker.statusID(0, false)) return false;
     return true;
   }
@@ -1929,8 +1959,8 @@ public final class AWTImageTools {
   /** Gets a color model for the given number of color components. */
   public static ColorModel makeColorModel(int c, int dataType) {
     ColorSpace cs = makeColorSpace(c);
-    return cs == null ? null : new ComponentColorModel(cs,
-      c == 4, false, Transparency.TRANSLUCENT, dataType);
+    return cs == null ? null : new ComponentColorModel(
+      cs, c == 4, false, Transparency.TRANSLUCENT, dataType);
   }
 
   // -- Indexed color conversion --
@@ -1945,7 +1975,7 @@ public final class AWTImageTools {
     if (pixelType == FormatTools.UINT8) {
       IndexColorModel model = (IndexColorModel) img.getColorModel();
       byte[][] b = new byte[3][indices[0].length];
-      for (int i=0; i<indices[0].length; i++) {
+      for (int i = 0; i < indices[0].length; i++) {
         b[0][i] = (byte) (model.getRed(indices[0][i] & 0xff) & 0xff);
         b[1][i] = (byte) (model.getGreen(indices[0][i] & 0xff) & 0xff);
         b[2][i] = (byte) (model.getBlue(indices[0][i] & 0xff) & 0xff);
@@ -1955,8 +1985,8 @@ public final class AWTImageTools {
     else if (pixelType == FormatTools.UINT16) {
       Index16ColorModel model = (Index16ColorModel) img.getColorModel();
       short[][] s = new short[3][indices[0].length / 2];
-      for (int i=0; i<s[0].length; i++) {
-        int ndx = DataTools.bytesToInt(indices[0], i*2, 2, le) & 0xffff;
+      for (int i = 0; i < s[0].length; i++) {
+        int ndx = DataTools.bytesToInt(indices[0], i * 2, 2, le) & 0xffff;
         s[0][i] = (short) (model.getRed(ndx) & 0xffff);
         s[1][i] = (short) (model.getRed(ndx) & 0xffff);
         s[2][i] = (short) (model.getRed(ndx) & 0xffff);
