@@ -37,14 +37,14 @@
 package loci.formats;
 
 /**
- * FormatException is the exception thrown when something
- * goes wrong performing a file format operation.
+ * A legacy delegator class (via a "hasa" relationship) with
+ * ome.scifio.FormatException
  *
  * <dl><dt><b>Source code:</b></dt>
  * <dd><a href="http://trac.openmicroscopy.org.uk/ome/browser/bioformats.git/components/bio-formats/src/loci/formats/FormatException.java">Trac</a>,
  * <a href="http://git.openmicroscopy.org/?p=bioformats.git;a=blob;f=components/bio-formats/src/loci/formats/FormatException.java;hb=HEAD">Gitweb</a></dd></dl>
  */
-public class FormatException extends Exception {
+public class FormatException extends ome.scifio.FormatException {
 
   public FormatException() { super(); }
   public FormatException(String s) { super(s); }
