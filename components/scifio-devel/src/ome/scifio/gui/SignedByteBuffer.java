@@ -34,43 +34,43 @@
  * #L%
  */
 
-package ome.scifio.util;
+package ome.scifio.gui;
 
 import java.awt.image.DataBuffer;
 
 /**
- * DataBuffer that stores unsigned ints.
+ * DataBuffer that stores signed bytes.
  *
  * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://trac.openmicroscopy.org.uk/ome/browser/bioformats.git/components/bio-formats/src/loci/formats/gui/UnsignedIntBuffer.java">Trac</a>,
- * <a href="http://git.openmicroscopy.org/?p=bioformats.git;a=blob;f=components/bio-formats/src/loci/formats/gui/UnsignedIntBuffer.java;hb=HEAD">Gitweb</a></dd></dl>
+ * <dd><a href="http://trac.openmicroscopy.org.uk/ome/browser/bioformats.git/components/bio-formats/src/loci/formats/gui/SignedByteBuffer.java">Trac</a>,
+ * <a href="http://git.openmicroscopy.org/?p=bioformats.git;a=blob;f=components/bio-formats/src/loci/formats/gui/SignedByteBuffer.java;hb=HEAD">Gitweb</a></dd></dl>
  *
  * @author Melissa Linkert melissa at glencoesoftware.com
  */
-public class UnsignedIntBuffer extends DataBuffer {
+public class SignedByteBuffer extends DataBuffer {
 
-  private int[][] bankData;
+  private byte[][] bankData;
 
-  /** Construct a new buffer of unsigned ints using the given int array.  */
-  public UnsignedIntBuffer(int[] dataArray, int size) {
-    super(DataBuffer.TYPE_INT, size);
-    bankData = new int[1][];
+  /** Construct a new buffer of signed bytes using the given byte array.  */
+  public SignedByteBuffer(byte[] dataArray, int size) {
+    super(DataBuffer.TYPE_BYTE, size);
+    bankData = new byte[1][];
     bankData[0] = dataArray;
   }
 
-  /** Construct a new buffer of unsigned ints using the given 2D int array. */
-  public UnsignedIntBuffer(int[][] dataArray, int size) {
-    super(DataBuffer.TYPE_INT, size);
+  /** Construct a new buffer of signed bytes using the given 2D byte array. */
+  public SignedByteBuffer(byte[][] dataArray, int size) {
+    super(DataBuffer.TYPE_BYTE, size);
     bankData = dataArray;
   }
 
   /* @see java.awt.image.DataBuffer.getData() */
-  public int[] getData() {
+  public byte[] getData() {
     return bankData[0];
   }
 
   /* @see java.awt.image.DataBuffer#getData(int) */
-  public int[] getData(int bank) {
+  public byte[] getData(int bank) {
     return bankData[bank];
   }
 
@@ -81,28 +81,7 @@ public class UnsignedIntBuffer extends DataBuffer {
 
   /* @see java.awt.image.DataBuffer#getElem(int, int) */
   public int getElem(int bank, int i) {
-    int value = bankData[bank][i + getOffsets()[bank]];
-    return (int) (value & 0xffffffffL);
-  }
-
-  /* @see java.awt.image.DataBuffer#getElemFloat(int) */
-  public float getElemFloat(int i) {
-    return getElemFloat(0, i);
-  }
-
-  /* @see java.awt.image.DataBuffer#getElemFloat(int, int) */
-  public float getElemFloat(int bank, int i) {
-    return (getElem(bank, i) & 0xffffffffL);
-  }
-
-  /* @see java.awt.image.DataBuffer#getElemDouble(int) */
-  public double getElemDouble(int i) {
-    return getElemDouble(0, i);
-  }
-
-  /* @see java.awt.image.DataBuffer#getElemDouble(int, int) */
-  public double getElemDouble(int bank, int i) {
-    return (getElem(bank, i) & 0xffffffffL);
+    return bankData[bank][i + getOffsets()[bank]];
   }
 
   /* @see java.awt.image.DataBuffer#setElem(int, int) */
@@ -112,27 +91,7 @@ public class UnsignedIntBuffer extends DataBuffer {
 
   /* @see java.awt.image.DataBuffer#setElem(int, int, int) */
   public void setElem(int bank, int i, int val) {
-    bankData[bank][i + getOffsets()[bank]] = val;
-  }
-
-  /* @see java.awt.image.DataBuffer#setElemFloat(int, float) */
-  public void setElemFloat(int i, float val) {
-    setElemFloat(0, i, val);
-  }
-
-  /* @see java.awt.image.DataBuffer#setElemFloat(int, int, float) */
-  public void setElemFloat(int bank, int i, float val) {
-    bankData[bank][i + getOffsets()[bank]] = (int) val;
-  }
-
-  /* @see java.awt.image.DataBuffer#setElemDouble(int, double) */
-  public void setElemDouble(int i, double val) {
-    setElemDouble(0, i, val);
-  }
-
-  /* @see java.awt.image.DataBuffer#setElemDouble(int, int, double) */
-  public void setElemDouble(int bank, int i, double val) {
-    bankData[bank][i + getOffsets()[bank]] = (int) val;
+    bankData[bank][i + getOffsets()[bank]] = (byte) val;
   }
 
 }

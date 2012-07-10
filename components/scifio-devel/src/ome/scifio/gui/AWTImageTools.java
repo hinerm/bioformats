@@ -34,7 +34,7 @@
  * #L%
  */
 
-package ome.scifio.util;
+package ome.scifio.gui;
 
 import java.awt.Component;
 import java.awt.Container;
@@ -80,6 +80,8 @@ import loci.formats.meta.MetadataRetrieve;
 import ome.scifio.FormatException;
 import ome.scifio.Reader;
 import ome.scifio.common.DataTools;
+import ome.scifio.util.ImageTools;
+import ome.scifio.util.MetadataTools;
 import ome.xml.model.primitives.PositiveInteger;
 
 import org.slf4j.Logger;
