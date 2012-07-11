@@ -38,6 +38,8 @@ package loci.formats;
 
 import java.util.Hashtable;
 
+import net.imglib2.meta.Axes;
+
 /**
  * Encompasses core metadata values.
  *
@@ -160,39 +162,56 @@ public class CoreMetadata {
     copy(r, seriesNo);
   }
 
-  // -- Object methods --
-
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append(super.toString() + ":");
-    sb.append("\n\tsizeX = " + sizeX);
-    sb.append("\n\tsizeY = " + sizeY);
-    sb.append("\n\tsizeZ = " + sizeZ);
-    sb.append("\n\tsizeC = " + sizeC);
-    sb.append("\n\tsizeT = " + sizeT);
-    sb.append("\n\tthumbSizeX = " + thumbSizeX);
-    sb.append("\n\tthumbSizeY = " + thumbSizeY);
-    sb.append("\n\tpixelType = " + FormatTools.getPixelTypeString(pixelType));
-    sb.append("\n\tbitsPerPixel = " + bitsPerPixel);
-    sb.append("\n\timageCount = " + imageCount);
-    sb.append("\n\tcLengths =");
-    if (cLengths == null) sb.append(" null");
-    else for (int i=0; i<cLengths.length; i++) sb.append(" " + cLengths[i]);
-    sb.append("\n\tcTypes =");
-    if (cTypes == null) sb.append(" null");
-    else for (int i=0; i<cTypes.length; i++) sb.append(" " + cTypes[i]);
-    sb.append("\n\tdimensionOrder = " + dimensionOrder);
-    sb.append("\n\torderCertain = " + orderCertain);
-    sb.append("\n\trgb = " + rgb);
-    sb.append("\n\tlittleEndian = " + littleEndian);
-    sb.append("\n\tinterleaved = " + interleaved);
-    sb.append("\n\tindexed = " + indexed);
-    sb.append("\n\tfalseColor = " + falseColor);
-    sb.append("\n\tmetadataComplete = " + metadataComplete);
-    sb.append("\n\tseriesMetadata = " + seriesMetadata.size() + " keys");
-    sb.append("\n\tthumbnail = " + thumbnail);
-    return sb.toString();
+  public CoreMetadata(ome.scifio.CoreMetadata scmeta, int series) {
+    this(scmeta.getImageMetadata().toArray(
+        new ome.scifio.CoreImageMetadata[scmeta.getImageCount()])[series]);
   }
+  
+  public CoreMetadata(ome.scifio.CoreImageMetadata imgMeta) {
+    AxisType[] axes = imgMeta.getAxisTypes();
+    int xIndex = -1, yIndex = -1, cIndex = -1, tIndex = -1, zIndex = -1;
+    
+    for(int i = 0; i < axes.length; i++) {
+      switch((Axes)axes[i]) {
+      case X: xIndex = i;
+        break;
+      case Y: yIndex = i;
+        break;
+      case Z: zIndex = i;
+        break;
+      case CHANNEL: cIndex = i;
+        break;
+      case TIME: tIndex = i;
+        break;
+      default:
+      }
+    }
+    
+    sizeX = xIndex == -1 ? 1 : imgMeta.getAxisLengths()[xIndex];
+    sizeY = yIndex == -1 ? 1 : imgMeta.getAxisLengths()[yIndex];
+    sizeZ = zIndex == -1 ? 1 : imgMeta.getAxisLengths()[zIndex];
+    sizeC = cIndex == -1 ? 1 : imgMeta.getAxisLengths()[cIndex];
+    sizeT = tIndex == -1 ? 1 : imgMeta.getAxisLengths()[tIndex];
+    thumbSizeX = imgMeta.getThumbSizeX();
+    thumbSizeY = imgMeta.getThumbSizeY();
+    pixelType = imgMeta.getPixelType();
+    bitsPerPixel = imgMeta.getBitsPerPixel();
+    imageCount = imgMeta.getPlaneCount();
+    cLengths = imgMeta.getcLengths();
+    cTypes = imgMeta.getcTypes();
+    dimensionOrder = ome.scifio.util.FormatTools.findDimensionOrder(imgMeta.getAxisTypes());
+    orderCertain = imgMeta.isOrderCertain();
+    rgb = imgMeta.isRgb();
+    littleEndian = imgMeta.isLittleEndian();
+    interleaved = imgMeta.isInterleaved();
+    indexed = imgMeta.isIndexed();
+    falseColor = imgMeta.isFalseColor();
+    metadataComplete = imgMeta.isMetadataComplete();
+    seriesMetadata = imgMeta.getImageMetadata();
+    thumbnail = imgMeta.isThumbnail();
+  }
+
+  // -- CoreMetadata methods --
 
   public void copy(IFormatReader r, int seriesNo) {
     int realSeries = 0;
@@ -236,5 +255,39 @@ public class CoreMetadata {
 
     r.setSeries(currentSeries);
     r.setResolution(currentResolution);
+  }
+
+  // -- Object methods --
+
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append(super.toString() + ":");
+    sb.append("\n\tsizeX = " + sizeX);
+    sb.append("\n\tsizeY = " + sizeY);
+    sb.append("\n\tsizeZ = " + sizeZ);
+    sb.append("\n\tsizeC = " + sizeC);
+    sb.append("\n\tsizeT = " + sizeT);
+    sb.append("\n\tthumbSizeX = " + thumbSizeX);
+    sb.append("\n\tthumbSizeY = " + thumbSizeY);
+    sb.append("\n\tpixelType = " + FormatTools.getPixelTypeString(pixelType));
+    sb.append("\n\tbitsPerPixel = " + bitsPerPixel);
+    sb.append("\n\timageCount = " + imageCount);
+    sb.append("\n\tcLengths =");
+    if (cLengths == null) sb.append(" null");
+    else for (int i=0; i<cLengths.length; i++) sb.append(" " + cLengths[i]);
+    sb.append("\n\tcTypes =");
+    if (cTypes == null) sb.append(" null");
+    else for (int i=0; i<cTypes.length; i++) sb.append(" " + cTypes[i]);
+    sb.append("\n\tdimensionOrder = " + dimensionOrder);
+    sb.append("\n\torderCertain = " + orderCertain);
+    sb.append("\n\trgb = " + rgb);
+    sb.append("\n\tlittleEndian = " + littleEndian);
+    sb.append("\n\tinterleaved = " + interleaved);
+    sb.append("\n\tindexed = " + indexed);
+    sb.append("\n\tfalseColor = " + falseColor);
+    sb.append("\n\tmetadataComplete = " + metadataComplete);
+    sb.append("\n\tseriesMetadata = " + seriesMetadata.size() + " keys");
+    sb.append("\n\tthumbnail = " + thumbnail);
+    return sb.toString();
   }
 }
