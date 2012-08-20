@@ -43,6 +43,6 @@ package loci.common.services;
  *
  * @author callan
  */
-public interface Service {
+public interface Service extends ome.scifio.services.Service {
 
 }

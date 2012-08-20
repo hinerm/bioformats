@@ -34,48 +34,28 @@
  * #L%
  */
 
-package loci.common.services;
+package ome.scifio.services;
+
 
 /**
- * Exception thrown when there is an error within a given service. That could
- * not be handled.
- *
  * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://trac.openmicroscopy.org.uk/ome/browser/bioformats.git/components/common/src/loci/common/services/ServiceException.java">Trac</a>,
- * <a href="http://git.openmicroscopy.org/?p=bioformats.git;a=blob;f=components/common/src/loci/common/services/ServiceException.java;hb=HEAD">Gitweb</a></dd></dl>
+ * <dd><a href="http://trac.openmicroscopy.org.uk/ome/browser/bioformats.git/components/common/src/loci/common/services/AbstractService.java">Trac</a>,
+ * <a href="http://git.openmicroscopy.org/?p=bioformats.git;a=blob;f=components/common/src/loci/common/services/AbstractService.java;hb=HEAD">Gitweb</a></dd></dl>
  *
- * @author Chris Allan <callan at blackcat dot ca>
+ * @author callan
  */
-public class ServiceException extends ome.scifio.services.ServiceException
-{
-  /** Serial for this version. */
-  private static final long serialVersionUID = 7402442944895106504L;
+public abstract class AbstractService implements Service {
 
   /**
-   * Default constructor.
-   * @param message Error message.
+   * Checks a given class dependency at runtime to ensure that a given class
+   * will be available. This method is expected to be called at least once by
+   * all service implementations.
+   * @param klass A class that this service depends upon.
    */
-  public ServiceException(String message)
-  {
-    super(message);
+  protected void checkClassDependency(Class<? extends Object> klass) {
+    // Just need *something* here to trigger a ClassNotFoundException if the
+    // class isn't on the classpath.
+    klass.getName();
   }
 
-  /**
-   * Default constructor.
-   * @param message Error message. 
-   * @param cause Upstream exception.
-   */
-  public ServiceException(String message, Throwable cause)
-  {
-    super(message, cause);
-  }
-
-  /**
-   * Default constructor.
-   * @param cause Upstream exception.
-   */
-  public ServiceException(Throwable cause)
-  {
-    super(cause);
-  }
 }
