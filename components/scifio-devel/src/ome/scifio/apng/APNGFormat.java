@@ -910,7 +910,10 @@ public class APNGFormat
     }
     
     // -- Translator API Methods -- 
+    
+    @Override
     public void translate(final CoreMetadata source, final Metadata dest) {
+      super.translate(source, dest);
   
       final APNGIHDRChunk ihdr =
         dest.getIhdr() == null ? new APNGIHDRChunk() : dest.getIhdr();
@@ -1008,7 +1011,9 @@ public class APNGFormat
   
     // -- Translator API Methods --
   
+    @Override
     public void translate(final Metadata source, final CoreMetadata dest) {
+      super.translate(source, dest);
       final CoreImageMetadata coreMeta = new CoreImageMetadata();
       dest.add(coreMeta);
   
