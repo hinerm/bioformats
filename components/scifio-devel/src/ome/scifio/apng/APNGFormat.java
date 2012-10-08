@@ -95,7 +95,7 @@ public class APNGFormat
   }
   
   public APNGFormat(final SCIFIO ctx) throws FormatException {
-    super(ctx, Metadata.class, Checker.class, Parser.class, Reader.class, Writer.class);
+    super(ctx, "Animated PNG", "png", Metadata.class, Checker.class, Parser.class, Reader.class, Writer.class);
   }
 
   /**
@@ -220,7 +220,7 @@ public class APNGFormat
   
     /** Constructs a new APNGChecker */
     public Checker(final SCIFIO ctx) {
-      super("Animated PNG", "png", ctx);
+      super(ctx);
       suffixNecessary = false;
     }
   
@@ -420,7 +420,7 @@ public class APNGFormat
     }
   
     public Reader(final SCIFIO ctx) {
-      super("Animated PNG", "png", ctx);
+      super(ctx);
     }
   
     // -- Reader API Methods --
@@ -579,7 +579,7 @@ public class APNGFormat
     }
 
     public Writer(final SCIFIO ctx) {
-      super("Animated PNG", "png", ctx);
+      super(ctx);
     }
 
     // -- Writer API Methods --
