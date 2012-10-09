@@ -201,7 +201,7 @@ public class APNGFormat
   
   /* @see Metadata#resetMeta() */
     public void reset() {
-      super.reset(this.getClass());
+      super.reset(getClass());
       fctl = new ArrayList<APNGfcTLChunk>();
       idat = new ArrayList<APNGIDATChunk>();
     }
@@ -1159,7 +1159,7 @@ public class APNGFormat
     // -- Constructor --
 
     public APNGIHDRChunk() {
-      this.CHUNK_SIGNATURE = new byte[] {(byte) 0x49, 0x48, 0x44, 0x52};
+      CHUNK_SIGNATURE = new byte[] {(byte) 0x49, 0x48, 0x44, 0x52};
     }
 
     // -- Fields --
@@ -1256,7 +1256,7 @@ public class APNGFormat
     // -- Constructor --
   
     public APNGPLTEChunk() {
-      this.CHUNK_SIGNATURE = new byte[] {(byte) 0x50, 0x4C, 0x54, 0x45};
+      CHUNK_SIGNATURE = new byte[] {(byte) 0x50, 0x4C, 0x54, 0x45};
     }
   
     // -- Fields --
@@ -1351,14 +1351,14 @@ public class APNGFormat
     // -- Constructor --
   
     public APNGfcTLChunk() {
-      this.fdatChunks = new ArrayList<APNGfdATChunk>();
-      this.CHUNK_SIGNATURE = new byte[] {(byte) 0x66, 0x63, 0x54, 0x4C};
+      fdatChunks = new ArrayList<APNGfdATChunk>();
+      CHUNK_SIGNATURE = new byte[] {(byte) 0x66, 0x63, 0x54, 0x4C};
     }
   
     // -- Methods --
   
     public void addChunk(final APNGfdATChunk chunk) {
-      this.fdatChunks.add(chunk);
+      fdatChunks.add(chunk);
     }
   
     public int getSequenceNumber() {
@@ -1456,7 +1456,7 @@ public class APNGFormat
     // -- Constructor --
   
     public APNGIDATChunk() {
-      this.CHUNK_SIGNATURE = new byte[] {(byte) 0x49, 0x44, 0x41, 0x54};
+      CHUNK_SIGNATURE = new byte[] {(byte) 0x49, 0x44, 0x41, 0x54};
     }
   
   }
@@ -1477,7 +1477,7 @@ public class APNGFormat
     // -- Constructor --
   
     public APNGacTLChunk() {
-      this.CHUNK_SIGNATURE = new byte[] {(byte) 0x61, 0x63, 0x54, 0x4C};
+      CHUNK_SIGNATURE = new byte[] {(byte) 0x61, 0x63, 0x54, 0x4C};
     }
   
     // -- Fields --
@@ -1539,7 +1539,7 @@ public class APNGFormat
     // -- Constructor --
   
     public APNGfdATChunk() {
-      this.CHUNK_SIGNATURE = new byte[] {(byte) 0x66, 0x64, 0x41, 0x54};
+      CHUNK_SIGNATURE = new byte[] {(byte) 0x66, 0x64, 0x41, 0x54};
     }
   
     // -- Fields --
@@ -1570,7 +1570,7 @@ public class APNGFormat
     
     // -- Constructor --
     public APNGIENDChunk() {
-      this.CHUNK_SIGNATURE = new byte[] {(byte) 0x49, 0x45, 0x4E, 0x44};
+      CHUNK_SIGNATURE = new byte[] {(byte) 0x49, 0x45, 0x4E, 0x44};
     }
   }
 
