@@ -56,8 +56,8 @@ import ome.scifio.AbstractParser;
 import ome.scifio.AbstractReader;
 import ome.scifio.AbstractTranslator;
 import ome.scifio.AbstractWriter;
-import ome.scifio.CoreImageMetadata;
-import ome.scifio.CoreMetadata;
+import ome.scifio.ImageMetadata;
+import ome.scifio.DatasetMetadata;
 import ome.scifio.CoreTranslator;
 import ome.scifio.FormatException;
 import ome.scifio.SCIFIO;
@@ -924,9 +924,9 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
         this, imageIndex, planeIndex, buf.length, x, y, w, h);
   
       final int bpp =
-        FormatTools.getBytesPerPixel(cMeta.getPixelType(imageIndex));
+        FormatTools.getBytesPerPixel(dMeta.getPixelType(imageIndex));
       final int len = FormatTools.getPlaneSize(this, imageIndex);
-      final int pixel = bpp * cMeta.getRGBChannelCount(imageIndex);
+      final int pixel = bpp * dMeta.getRGBChannelCount(imageIndex);
       final int rowLen = FormatTools.getPlaneSize(this, w, 1, imageIndex);
   
       final int[] coordinates = FormatTools.getZCTCoords(this, imageIndex, planeIndex);
@@ -966,7 +966,7 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
   
           data =
             new byte[len *
-                     (storedRGB ? cMeta.getAxisLength(imageIndex, Axes.CHANNEL) : 1)];
+                     (storedRGB ? dMeta.getAxisLength(imageIndex, Axes.CHANNEL) : 1)];
           int toRead = data.length;
           while (toRead > 0) {
             toRead -= gzipStream.read(data, data.length - toRead, toRead);
@@ -975,12 +975,12 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
       }
   
       final int sizeC =
-        lifetime ? 1 : cMeta.getAxisLength(imageIndex, Axes.CHANNEL);
+        lifetime ? 1 : dMeta.getAxisLength(imageIndex, Axes.CHANNEL);
   
       final int channelLengths = 0;
   
-      if (!cMeta.isRGB(imageIndex) && sizeC > 4 &&
-        cMeta.getChannelDimLengths(imageIndex).length == 1 && storedRGB)
+      if (!dMeta.isRGB(imageIndex) && sizeC > 4 &&
+        dMeta.getChannelDimLengths(imageIndex).length == 1 && storedRGB)
       {
         // channels are stored interleaved, but because there are more than we
         // can display as RGB, we need to separate them
@@ -989,7 +989,7 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
           FormatTools.getIndex(
             this, imageIndex, coordinates[0], 0, coordinates[2]));
         if (!gzip && data == null) {
-          data = new byte[len * cMeta.getAxisLength(imageIndex, Axes.CHANNEL)];
+          data = new byte[len * dMeta.getAxisLength(imageIndex, Axes.CHANNEL)];
           in.read(data);
         }
         else if (!gzip &&
@@ -1003,8 +1003,8 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
             System.arraycopy(
               data,
               bpp *
-              ((planeIndex % cMeta.getAxisLength(imageIndex, Axes.CHANNEL)) + sizeC *
-                (row * cMeta.getAxisLength(imageIndex, Axes.X) + col)), buf,
+              ((planeIndex % dMeta.getAxisLength(imageIndex, Axes.CHANNEL)) + sizeC *
+                (row * dMeta.getAxisLength(imageIndex, Axes.X) + col)), buf,
                 bpp * (row * w + col), bpp);
           }
         }
@@ -1072,7 +1072,7 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
     public String[] getDomains() {
       FormatTools.assertStream(in, true, 0);
       final String[] domain = new String[] {FormatTools.GRAPHICS_DOMAIN};
-      if (cMeta.getChannelDimLengths(0).length > 1) {
+      if (dMeta.getChannelDimLengths(0).length > 1) {
         domain[0] = FormatTools.FLIM_DOMAIN;
       }
       else if (metadata.hasInstrumentData) {
@@ -1138,9 +1138,9 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
     {
       checkParams(imageIndex, planeIndex, buf, x, y, w, h);
 
-      int sizeZ = cMeta.getAxisLength(imageIndex, Axes.Z);
-      int sizeC = cMeta.getAxisLength(imageIndex, Axes.CHANNEL);
-      int sizeT = cMeta.getAxisLength(imageIndex, Axes.TIME);
+      int sizeZ = dMeta.getAxisLength(imageIndex, Axes.Z);
+      int sizeC = dMeta.getAxisLength(imageIndex, Axes.CHANNEL);
+      int sizeT = dMeta.getAxisLength(imageIndex, Axes.TIME);
       int planes = sizeZ * sizeC * sizeT;
 
       int[] coords =
@@ -1150,11 +1150,11 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
           FormatTools.getIndex(outputOrder, sizeZ, sizeC, sizeT,
           planes, coords[0], coords[1], coords[2]);
 
-      int sizeX = cMeta.getAxisLength(imageIndex, Axes.X);
-      int sizeY = cMeta.getAxisLength(imageIndex, Axes.Y);
-      int pixelType = cMeta.getPixelType(imageIndex);
+      int sizeX = dMeta.getAxisLength(imageIndex, Axes.X);
+      int sizeY = dMeta.getAxisLength(imageIndex, Axes.Y);
+      int pixelType = dMeta.getPixelType(imageIndex);
       int bytesPerPixel = FormatTools.getBytesPerPixel(pixelType);
-      int rgbChannels = cMeta.getRGBChannelCount(imageIndex);
+      int rgbChannels = dMeta.getRGBChannelCount(imageIndex);
       int planeSize = sizeX * sizeY * rgbChannels * bytesPerPixel;
 
       if(!initialized[planeIndex][realIndex]) {
@@ -1206,8 +1206,8 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
     
     /* @see ome.scifio.Writer#close() */
     public void close(int imageIndex) throws IOException {
-      if (lastPlane != cMeta.getPlaneCount(imageIndex) - 1 && out != null) {
-        overwriteDimensions(cMeta, imageIndex);
+      if (lastPlane != dMeta.getPlaneCount(imageIndex) - 1 && out != null) {
+        overwriteDimensions(dMeta, imageIndex);
       }
 
       super.close();
@@ -1271,7 +1271,7 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
         out.writeBytes("filename\t" + currentId + "\n");
         out.writeBytes("layout\tparameters\t6\n");
 
-        CoreMetadata meta = cMeta;
+        DatasetMetadata meta = dMeta;
         //SCIFIOMetadataTools.verifyMinimumPopulated(meta, pixels);
 
         int pixelType = meta.getPixelType(imageIndex);
@@ -1355,7 +1355,7 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
       }
     }
     
-    private int[] overwriteDimensions(CoreMetadata meta, int imageIndex) throws IOException {
+    private int[] overwriteDimensions(DatasetMetadata meta, int imageIndex) throws IOException {
       out.seek(dimensionOffset);
       int sizeX = meta.getAxisLength(imageIndex, Axes.X);
       int sizeY = meta.getAxisLength(imageIndex, Axes.Y);
@@ -1971,9 +1971,9 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
    * metadata type.
    * 
    */
-  @SCIFIOTranslator(metaIn = CoreMetadata.class, metaOut = Metadata.class)
+  @SCIFIOTranslator(metaIn = DatasetMetadata.class, metaOut = Metadata.class)
   public static class CoreICSTranslator
-  extends AbstractTranslator<CoreMetadata, Metadata>
+  extends AbstractTranslator<DatasetMetadata, Metadata>
   implements CoreTranslator {
   
     // -- Constructors --
@@ -1989,7 +1989,7 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
     // -- Translator API Methods --
   
     @Override
-    public void translate(final CoreMetadata source, final Metadata destination)
+    public void translate(final DatasetMetadata source, final Metadata destination)
     {
       super.translate(source, destination);
       // note that the destination fields will preserve their default values
@@ -2093,9 +2093,9 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
    * to the SCIFIO Core metadata type. 
    *
    */
-  @SCIFIOTranslator(metaIn = Metadata.class, metaOut = CoreMetadata.class)
+  @SCIFIOTranslator(metaIn = Metadata.class, metaOut = DatasetMetadata.class)
   public static class ICSCoreTranslator
-  extends AbstractTranslator<Metadata, CoreMetadata>
+  extends AbstractTranslator<Metadata, DatasetMetadata>
   implements CoreTranslator {
 
     private Metadata curSource;
@@ -2113,16 +2113,16 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
     // -- Translator API Methods --
 
     @Override
-    public void translate(final Metadata source, final CoreMetadata destination)
+    public void translate(final Metadata source, final DatasetMetadata destination)
     {
       super.translate(source, destination);
-      final CoreImageMetadata coreMeta = new CoreImageMetadata();
-      destination.add(coreMeta);
+      final ImageMetadata imageMeta = new ImageMetadata();
+      destination.add(imageMeta);
       final int index = destination.getImageCount() - 1;
 
       curSource = source;
 
-      coreMeta.setRgb(false);
+      imageMeta.setRgb(false);
 
       // find axis sizes
 
@@ -2194,8 +2194,8 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
       
       destination.setBitsPerPixel(index, bitsPerPixel);
 
-      coreMeta.setAxisLengths(axisLengths);
-      coreMeta.setAxisTypes(axisTypes);
+      imageMeta.setAxisLengths(axisLengths);
+      imageMeta.setAxisTypes(axisTypes);
       //storedRGB = getSizeX() == 0;
 
       if (channelLengths.size() == 0) {
@@ -2211,8 +2211,8 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
         cTypes[i] = channelTypes.get(i);
       }
 
-      coreMeta.setcLengths(cLengths);
-      coreMeta.setcTypes(cTypes);
+      imageMeta.setcLengths(cLengths);
+      imageMeta.setcTypes(cTypes);
 
       if (destination.getAxisIndex(index, Axes.Z) == -1) {
         destination.addAxis(index, Axes.Z, 1);
@@ -2225,16 +2225,16 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
       }
 
       if (destination.getAxisLength(index, Axes.Z) == 0)
-        coreMeta.setAxisLength(Axes.Z, 1);
+        imageMeta.setAxisLength(Axes.Z, 1);
       if (destination.getAxisLength(index, Axes.CHANNEL) == 0)
-        coreMeta.setAxisLength(Axes.CHANNEL, 1);
+        imageMeta.setAxisLength(Axes.CHANNEL, 1);
       if (destination.getAxisLength(index, Axes.TIME) == 0)
-        coreMeta.setAxisLength(Axes.TIME, 1);
+        imageMeta.setAxisLength(Axes.TIME, 1);
 
-      coreMeta.setPlaneCount(destination.getAxisLength(0, Axes.Z) *
+      imageMeta.setPlaneCount(destination.getAxisLength(0, Axes.Z) *
         destination.getAxisLength(0, Axes.TIME));
 
-      coreMeta.setInterleaved(destination.isRGB(0));
+      imageMeta.setInterleaved(destination.isRGB(0));
       //TODO coreMeta.imageCount = getSizeZ() * getSizeT();
       //TODO if (destination.isRGB(0)) coreMeta.imageCount *= getSizeC();
       destination.setIndexed(index, false);
@@ -2247,15 +2247,15 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
       // HACK - support for Gray Institute at Oxford's ICS lifetime data
       if (lifetime) {
         final int binCount = destination.getAxisLength(index, Axes.Z);
-        coreMeta.setAxisLength(
+        imageMeta.setAxisLength(
           Axes.Z, (destination.getAxisLength(index, Axes.CHANNEL)));
-        coreMeta.setAxisLength(Axes.CHANNEL, binCount);
-        coreMeta.setcLengths(new int[] {binCount});
-        coreMeta.setcTypes(new String[] {FormatTools.LIFETIME});
+        imageMeta.setAxisLength(Axes.CHANNEL, binCount);
+        imageMeta.setcLengths(new int[] {binCount});
+        imageMeta.setcTypes(new String[] {FormatTools.LIFETIME});
         final int cIndex = destination.getAxisIndex(index, Axes.CHANNEL);
         final int zIndex = destination.getAxisIndex(index, Axes.Z);
-        coreMeta.setAxisType(cIndex, Axes.Z);
-        coreMeta.setAxisType(zIndex, Axes.CHANNEL);
+        imageMeta.setAxisType(cIndex, Axes.Z);
+        imageMeta.setAxisType(zIndex, Axes.CHANNEL);
       }
 
       final String byteOrder = source.getByteOrder();
@@ -2265,7 +2265,7 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
       if (byteOrder != null) {
         final String firstByte = byteOrder.split(" ")[0];
         final int first = Integer.parseInt(firstByte);
-        coreMeta.setLittleEndian(rFormat.equals("real") ? first == 1 : first != 1);
+        imageMeta.setLittleEndian(rFormat.equals("real") ? first == 1 : first != 1);
       }
 
       final boolean gzip =
@@ -2274,13 +2274,13 @@ AbstractFormat<ICSFormat.Metadata, ICSFormat.Checker,
       final int bytes = bitsPerPixel / 8;
 
       if (bitsPerPixel < 32)
-        coreMeta.setLittleEndian(!destination.isLittleEndian(0));
+        imageMeta.setLittleEndian(!destination.isLittleEndian(0));
 
       final boolean floatingPt = rFormat.equals("real");
       final boolean signed = source.isSigned();
 
       try {
-        coreMeta.setPixelType(FormatTools.pixelTypeFromBytes(bytes, signed, floatingPt));
+        imageMeta.setPixelType(FormatTools.pixelTypeFromBytes(bytes, signed, floatingPt));
       }
       catch (final FormatException e) {
         LOGGER.error("Could not get pixel type from bytes: " + bytes, e);
