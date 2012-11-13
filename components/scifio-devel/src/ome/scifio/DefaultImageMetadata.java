@@ -167,7 +167,7 @@ public class DefaultImageMetadata implements ImageMetadata {
     orderCertain = copy.isOrderCertain();
     pixelType = copy.getPixelType();
     planeCount = copy.getPlaneCount();
-    rgb = copy.isRgb();
+    rgb = copy.isRGB();
     thumbnail = copy.isThumbnail();
     thumbSizeX = copy.getThumbSizeX();
     thumbSizeY = copy.getThumbSizeY();
@@ -203,7 +203,7 @@ public class DefaultImageMetadata implements ImageMetadata {
     this.orderCertain = orderCertain;
   }
 
-  public void setRgb(final boolean rgb) {
+  public void setRGB(final boolean rgb) {
     this.rgb = rgb;
   }
 
@@ -301,7 +301,7 @@ public class DefaultImageMetadata implements ImageMetadata {
     return orderCertain;
   }
 
-  public boolean isRgb() {
+  public boolean isRGB() {
     return rgb;
   }
 

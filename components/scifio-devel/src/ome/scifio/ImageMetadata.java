@@ -81,7 +81,7 @@ public interface ImageMetadata {
    * Sets whether or not the planes are stored as RGB
    * (multiple channels per plane).
    */
-  void setRgb(boolean rgb);
+  void setRGB(boolean rgb);
 
   /** Sets whether or not each pixel's bytes are in little endian order. */
   void setLittleEndian(boolean littleEndian);
@@ -177,7 +177,7 @@ public interface ImageMetadata {
    * Returns true if the planes are stored as RGB
    * (multiple channels per plane).
    */
-  boolean isRgb();
+  boolean isRGB();
 
   /** Returns true if each pixel's bytes are in little endian order. */
   boolean isLittleEndian();

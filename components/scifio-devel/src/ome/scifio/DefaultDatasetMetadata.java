@@ -158,7 +158,7 @@ public class DefaultDatasetMetadata extends AbstractMetadata
   }
 
   public boolean isRGB(final int imageIndex) {
-    return imageMeta.get(imageIndex).isRgb();
+    return imageMeta.get(imageIndex).isRGB();
   }
 
   public boolean isFalseColor(final int imageIndex) {
@@ -389,7 +389,7 @@ public class DefaultDatasetMetadata extends AbstractMetadata
   }
 
   public void setRGB(final int imageIndex, final boolean rgb) {
-    imageMeta.get(imageIndex).setRgb(rgb);
+    imageMeta.get(imageIndex).setRGB(rgb);
   }
 
   public void setLittleEndian(final int imageIndex, final boolean littleEndian)
