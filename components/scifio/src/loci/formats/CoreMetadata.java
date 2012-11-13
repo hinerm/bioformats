@@ -199,8 +199,8 @@ public class CoreMetadata {
     pixelType = imgMeta.getPixelType();
     bitsPerPixel = imgMeta.getBitsPerPixel();
     imageCount = imgMeta.getPlaneCount();
-    cLengths = imgMeta.getcLengths();
-    cTypes = imgMeta.getcTypes();
+    cLengths = imgMeta.getChannelLengths();
+    cTypes = imgMeta.getChannelTypes();
     dimensionOrder = ome.scifio.util.FormatTools.findDimensionOrder(imgMeta.getAxisTypes());
     orderCertain = imgMeta.isOrderCertain();
     rgb = imgMeta.isRgb();
@@ -309,8 +309,8 @@ public class CoreMetadata {
     coreImg.setThumbSizeY(thumbSizeY);
     coreImg.setPixelType(pixelType);
     coreImg.setBitsPerPixel(bitsPerPixel);
-    coreImg.setcLengths(cLengths);
-    coreImg.setcTypes(cTypes);
+    coreImg.setChannelLengths(cLengths);
+    coreImg.setChannelTypes(cTypes);
     coreImg.setOrderCertain(orderCertain);
     coreImg.setRgb(rgb);
     coreImg.setLittleEndian(littleEndian);
