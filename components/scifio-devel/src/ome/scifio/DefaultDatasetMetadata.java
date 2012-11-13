@@ -33,7 +33,6 @@
  * policies, either expressed or implied, of any organization.
  * #L%
  */
-
 package ome.scifio;
 
 import java.util.ArrayList;
@@ -48,14 +47,16 @@ import net.imglib2.meta.AxisType;
 import ome.scifio.util.FormatTools;
 
 /**
- * DatasetMetadata represents the metadata for a complete dataset, consisting of an
- * arbitrary number of images (and corresponding ImageMetadata objects).
+ * Default implementation of {@link DatasetMetadata}.
+ * <p>
+ * Serves as a collection of {@link DefaultImageMetadata} objects.
+ * </p>
  * 
- * DatasetMetadata is the lowest level image currency of SCIFIO, that by default all formats
- * can be translated to/from.
+ * @author Mark Hiner
  *
  */
-public class DefaultDatasetMetadata extends AbstractMetadata implements DatasetMetadata<DefaultImageMetadata> {
+public class DefaultDatasetMetadata extends AbstractMetadata 
+  implements DatasetMetadata<DefaultImageMetadata> {
 
   // -- Fields --
 
