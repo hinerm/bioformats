@@ -41,9 +41,9 @@ import java.util.Hashtable;
 import net.imglib2.meta.AxisType;
 
 /**
- * ImageMetadata consists of the metadata fields common 
- * to any image type, expressed in a standardized way within
- *  SCIFIO.
+ * Default implementation of {@link ImageMetadata}.
+ * 
+ * @author Mark Hiner
  *
  */
 public class DefaultImageMetadata implements ImageMetadata {
