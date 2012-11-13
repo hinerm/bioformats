@@ -97,7 +97,7 @@ public class DefaultDatasetMetadata extends AbstractMetadata
 
   // -- Getters --
 
-  public Object getMetadataValue(final int imageIndex, final String field) {
+  public Object getMetadataValue(final String field) {
     return datasetMeta.get(field);
   }
 
