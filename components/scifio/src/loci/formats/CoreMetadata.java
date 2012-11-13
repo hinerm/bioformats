@@ -40,7 +40,7 @@ import java.util.Hashtable;
 
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
-import ome.scifio.ImageMetadata;
+import ome.scifio.DefaultImageMetadata;
 
 /**
  * Encompasses core metadata values.
@@ -164,7 +164,7 @@ public class CoreMetadata {
     copy(r, seriesNo);
   }
 
-  public CoreMetadata(ome.scifio.DatasetMetadata scmeta, int series) {
+  public CoreMetadata(ome.scifio.DefaultDatasetMetadata scmeta, int series) {
     this(scmeta.getImageMetadata().toArray(
         new ome.scifio.ImageMetadata[scmeta.getImageCount()])[series]);
   }
@@ -263,9 +263,9 @@ public class CoreMetadata {
    * Converts this CoreMetadata object to an ome.scifio.CoreMetadata.
    * 
    */
-  public ome.scifio.ImageMetadata convert() {
-    ome.scifio.DatasetMetadata cMeta = new ome.scifio.DatasetMetadata();      
-    ImageMetadata coreImg = new ImageMetadata();
+  public ome.scifio.DefaultImageMetadata convert() {
+    ome.scifio.DefaultDatasetMetadata cMeta = new ome.scifio.DefaultDatasetMetadata();      
+    DefaultImageMetadata coreImg = new DefaultImageMetadata();
 
 
     int[] axisLengths = new int[5];
