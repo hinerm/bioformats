@@ -440,19 +440,21 @@ public class DefaultDatasetMetadata extends AbstractMetadata
   public void setAxisLength(final int imageIndex, final AxisType axis, final int length) {
     imageMeta.get(imageIndex).setAxisLength(axis, length);
   }
+  
+  // -- Helper Methods --
 
-  public void resetMeta() {
+  public void reset() {
     super.reset(this.getClass());
     datasetMeta = new Hashtable<String, Object>();
     imageMeta = new ArrayList<DefaultImageMetadata>();
   }
-
-  public Collection<DefaultImageMetadata> getImageMetadata() {
-    return Collections.unmodifiableCollection(imageMeta);
-  }
-
+  
   public void add(final DefaultImageMetadata meta) {
     imageMeta.add(meta);
+  }
+  
+  public Collection<DefaultImageMetadata> getImageMetadata() {
+    return Collections.unmodifiableCollection(imageMeta);
   }
 
   /*
