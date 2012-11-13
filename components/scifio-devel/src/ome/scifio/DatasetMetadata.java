@@ -33,175 +33,58 @@
  * policies, either expressed or implied, of any organization.
  * #L%
  */
-
 package ome.scifio;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Hashtable;
-import java.util.List;
 
-import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
-import ome.scifio.util.FormatTools;
 
 /**
- * DatasetMetadata represents the metadata for a complete dataset, consisting of an
- * arbitrary number of images (and corresponding ImageMetadata objects).
+ * TODO
  * 
- * DatasetMetadata is the lowest level image currency of SCIFIO, that by default all formats
- * can be translated to/from.
+ * @author Mark Hiner
  *
  */
-public class DatasetMetadata extends AbstractMetadata {
+public interface DatasetMetadata<M extends ImageMetadata> extends Metadata {
 
-  // -- Fields --
+  Object getMetadataValue(int imageIndex, String field);
 
-  /** Contains metadata key, value pairs for this dataset */
-  private Hashtable<String, Object> datasetMeta;
+  Object getImageMetadataValue(int imageIndex, String field);
 
-  /** Contains a list of metadata objects for each image in this dataset */
-  @Field(label = "imageMeta", isList = true)
-  private List<ImageMetadata> imageMeta;
+  Hashtable<String, Object> getDatasetMetadata();
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
+  Hashtable<String, Object> getImageMetadata(int imageIndex);
 
-  // -- Constructors --
+  int getImageCount();
 
-  public DatasetMetadata() {
-    this(null);
-  }
+  int getPlaneCount(int imageIndex);
 
-  public DatasetMetadata(final SCIFIO ctx) {
-    super(ctx);
-    datasetMeta = new Hashtable<String, Object>();
-    imageMeta = new ArrayList<ImageMetadata>();
-  }
-  
-  public DatasetMetadata(final DatasetMetadata copy, final SCIFIO ctx) {
-    super(ctx);
-    
-    datasetMeta = (Hashtable<String, Object>) copy.datasetMeta.clone();
-    imageMeta = new ArrayList<ImageMetadata>();
-    
-    for (ImageMetadata core : copy.imageMeta) {
-      imageMeta.add(new ImageMetadata(core));
-    }
-  }
+  boolean isInterleaved(int imageIndex);
 
-  // -- Getters --
+  int getPixelType(int imageIndex);
 
-  public Object getMetadataValue(final int imageIndex, final String field) {
-    return datasetMeta.get(field);
-  }
+  int getEffectiveSizeC(int imageIndex);
 
-  public Object getImageMetadataValue(final int imageIndex, final String field)
-  {
-    return imageMeta.get(imageIndex).getImageMetadata().get(field);
-  }
+  int getRGBChannelCount(int imageIndex);
 
-  public Hashtable<String, Object> getDatasetMetadata() {
-    return datasetMeta;
-  }
+  boolean isLittleEndian(int imageIndex);
 
-  public Hashtable<String, Object> getImageMetadata(final int imageIndex) {
-    return imageMeta.get(imageIndex).getImageMetadata();
-  }
+  boolean isIndexed(int imageIndex);
 
-  public int getImageCount() {
-    return imageMeta.size();
-  }
+  int getBitsPerPixel(int imageIndex);
 
-  public int getPlaneCount(final int imageIndex) {
-    return imageMeta.get(imageIndex).getPlaneCount();
-  }
+  boolean isRGB(int imageIndex);
 
-  public boolean isInterleaved(final int imageIndex) {
-    return imageMeta.get(imageIndex).isInterleaved();
-  }
+  boolean isFalseColor(int imageIndex);
 
-  public int getPixelType(final int imageIndex) {
-    return imageMeta.get(imageIndex).getPixelType();
-  }
+  int[] getChannelDimLengths(int imageIndex);
 
-  public int getEffectiveSizeC(final int imageIndex) {
-    final int sizeZT =
-      getAxisLength(imageIndex, Axes.Z) * getAxisLength(imageIndex, Axes.TIME);
-    if (sizeZT == 0) return 0;
-    return getPlaneCount(imageIndex) / sizeZT;
-  }
+  String[] getChannelDimTypes(int imageIndex);
 
-  public int getRGBChannelCount(final int imageIndex) {
-    if(!isRGB(imageIndex)) return 1;
-    
-    final int effSizeC = getEffectiveSizeC(imageIndex);
-    if (effSizeC == 0) return 0;
-    return getAxisLength(imageIndex, Axes.CHANNEL) / effSizeC;
-  }
+  int getThumbSizeX(int imageIndex);
 
-  public boolean isLittleEndian(final int imageIndex) {
-    return imageMeta.get(imageIndex).isLittleEndian();
-  }
-
-  public boolean isIndexed(final int imageIndex) {
-    return imageMeta.get(imageIndex).isIndexed();
-  }
-
-  public int getBitsPerPixel(final int imageIndex) {
-    return imageMeta.get(imageIndex).getBitsPerPixel();
-  }
-
-  public boolean isRGB(final int imageIndex) {
-    return imageMeta.get(imageIndex).isRgb();
-  }
-
-  public boolean isFalseColor(final int imageIndex) {
-    return imageMeta.get(imageIndex).isFalseColor();
-  }
-
-  public int[] getChannelDimLengths(final int imageIndex) {
-    if (imageMeta.get(imageIndex).getcLengths() == null)
-      return new int[] {getAxisLength(imageIndex, Axes.CHANNEL)};
-    return imageMeta.get(imageIndex).getcLengths();
-  }
-
-  public String[] getChannelDimTypes(final int imageIndex) {
-    if (imageMeta.get(imageIndex).getcTypes() == null)
-      return new String[] {FormatTools.CHANNEL};
-    return imageMeta.get(imageIndex).getcTypes();
-  }
-
-  public int getThumbSizeX(final int imageIndex) {
-    if (imageMeta.get(imageIndex).getThumbSizeX() == 0) {
-      final int sx = getAxisLength(imageIndex, Axes.X);
-      final int sy = getAxisLength(imageIndex, Axes.Y);
-      int thumbSizeX = 0;
-      if (sx > sy) thumbSizeX = FormatTools.THUMBNAIL_DIMENSION;
-      else if (sy > 0) thumbSizeX = sx * FormatTools.THUMBNAIL_DIMENSION / sy;
-      if (thumbSizeX == 0) thumbSizeX = 1;
-      return thumbSizeX;
-    }
-    return imageMeta.get(imageIndex).getThumbSizeX();
-  }
-
-  public int getThumbSizeY(final int imageIndex) {
-    if (imageMeta.get(imageIndex).getThumbSizeX() == 0) {
-      final int sx = getAxisLength(imageIndex, Axes.X);
-      final int sy = getAxisLength(imageIndex, Axes.Y);
-      int thumbSizeY = 1;
-      if (sy > sx) thumbSizeY = FormatTools.THUMBNAIL_DIMENSION;
-      else if (sx > 0) thumbSizeY = sy * FormatTools.THUMBNAIL_DIMENSION / sx;
-      if (thumbSizeY == 0) thumbSizeY = 1;
-      return thumbSizeY;
-    }
-    return imageMeta.get(imageIndex).getThumbSizeY();
-  }
+  int getThumbSizeY(int imageIndex);
 
   /**
    * Returns the number of axes (planes) in the
@@ -210,9 +93,7 @@ public class DatasetMetadata extends AbstractMetadata {
    * @param imageIndex - index for multi-image files
    * @return The axis/plane count
    */
-  public int getAxisCount(final int imageIndex) {
-    return imageMeta.get(imageIndex).getAxisLengths().length;
-  }
+  int getAxisCount(int imageIndex);
 
   /**
    * Gets the type of the (zero-indexed) specified plane.
@@ -221,9 +102,7 @@ public class DatasetMetadata extends AbstractMetadata {
    * @param planeIndex - index of the desired plane within the specified image
    * @return Type of the desired plane.
    */
-  public AxisType getAxisType(final int imageIndex, final int planeIndex) {
-    return imageMeta.get(imageIndex).getAxisTypes()[planeIndex];
-  }
+  AxisType getAxisType(int imageIndex, int planeIndex);
 
   /**
    * Gets the length of the (zero-indexed) specified plane.
@@ -232,10 +111,8 @@ public class DatasetMetadata extends AbstractMetadata {
    * @param planeIndex - index of the desired plane within the specified image
    * @return Length of the desired plane.
    */
-  public int getAxisLength(final int imageIndex, final int planeIndex) {
-    return imageMeta.get(imageIndex).getAxisLengths()[planeIndex];
-  }
-  
+  int getAxisLength(int imageIndex, int planeIndex);
+
   /**
    * A convenience method for looking up the length of an axis
    * based on its type. No knowledge of plane ordering is necessary.
@@ -244,9 +121,7 @@ public class DatasetMetadata extends AbstractMetadata {
    * @param t - desired axis type
    * @return
    */
-  public int getAxisLength(final int imageIndex, final AxisType t) {
-    return getAxisLength(imageIndex, getAxisIndex(imageIndex, t));
-  }
+  int getAxisLength(int imageIndex, AxisType t);
 
   /**
    * Returns the array index for the specified AxisType. This index
@@ -259,13 +134,8 @@ public class DatasetMetadata extends AbstractMetadata {
    * @param type - axis type to look up
    * @return The index of the desired axis or -1 if not found.
    */
-  public int getAxisIndex(final int imageIndex, final AxisType type) {
-    for (int i = 0; i < imageMeta.get(imageIndex).getAxisTypes().length; i++) {
-      if (imageMeta.get(imageIndex).getAxisTypes()[i] == type) return i;
-    }
-    return -1; // throw exception?
-  }
-  
+  int getAxisIndex(int imageIndex, AxisType type);
+
   /**
    * Returns an array of the types for axes associated with
    * the specified image index. Order is consistent with the
@@ -277,11 +147,8 @@ public class DatasetMetadata extends AbstractMetadata {
    * @param imageIndex - index for multi-image sources
    * @return An array of AxisTypes in the order they appear.
    */
-  public AxisType[] getAxes(int imageIndex) {
-    AxisType[] axes = imageMeta.get(imageIndex).getAxisTypes();
-    return Arrays.copyOf(axes, axes.length);
-  }
-  
+  AxisType[] getAxes(int imageIndex);
+
   /**
    * Returns an array of the lengths for axes associated with
    * the specified image index.
@@ -292,10 +159,7 @@ public class DatasetMetadata extends AbstractMetadata {
    * @param imageIndex
    * @return
    */
-  public int[] getAxesLengths(int imageIndex) {
-    int[] lengths = imageMeta.get(imageIndex).getAxisLengths();
-    return Arrays.copyOf(lengths, lengths.length);
-  }
+  int[] getAxesLengths(int imageIndex);
 
   /**
    * Appends the provided AxisType to the current AxisType array
@@ -305,9 +169,7 @@ public class DatasetMetadata extends AbstractMetadata {
    * @param imageIndex
    * @param type
    */
-  public void addAxis(final int imageIndex, final AxisType type) {
-    addAxis(imageIndex, type, 0);
-  }
+  void addAxis(int imageIndex, AxisType type);
 
   /**
    * Appends the provided AxisType to the current AxisType array
@@ -318,152 +180,60 @@ public class DatasetMetadata extends AbstractMetadata {
    * @param type
    * @param value
    */
-  public void addAxis(final int imageIndex, final AxisType type, final int value)
-  {
-    final int[] axisLengths = imageMeta.get(imageIndex).getAxisLengths();
-    final AxisType[] axisTypes = imageMeta.get(imageIndex).getAxisTypes();
-    final int[] tmpAxisLength = new int[axisLengths.length + 1];
-    final AxisType[] tmpAxisTypes = new AxisType[axisTypes.length + 1];
+  void addAxis(int imageIndex, AxisType type, int value);
 
-    for (int i = 0; i < axisLengths.length; i++) {
-      tmpAxisLength[i] = axisLengths[i];
-      tmpAxisTypes[i] = axisTypes[i];
-    }
+  boolean isOrderCertain(int imageIndex);
 
-    tmpAxisLength[tmpAxisLength.length - 1] = value;
-    tmpAxisTypes[tmpAxisTypes.length - 1] = type;
+  boolean isThumbnailImage(int imageIndex);
 
-    imageMeta.get(imageIndex).setAxisLengths(tmpAxisLength);
-    imageMeta.get(imageIndex).setAxisTypes(tmpAxisTypes);
-  }
+  boolean isMetadataComplete(int imageIndex);
 
-  public boolean isOrderCertain(final int imageIndex) {
-    return imageMeta.get(imageIndex).isOrderCertain();
-  }
+  void putDatasetMeta(String key, Object value);
 
-  public boolean isThumbnailImage(final int imageIndex) {
-    return imageMeta.get(imageIndex).isThumbnail();
-  }
+  void putImageMeta(int imageIndex, String key, Object value);
 
-  public boolean isMetadataComplete(final int imageIndex) {
-    return imageMeta.get(imageIndex).isMetadataComplete();
-  }
+  void setThumbSizeX(int imageIndex, int thumbX);
 
-  // -- Setters --
-  
-  public void putDatasetMeta(String key, Object value) {
-    datasetMeta.put(key, value);
-  }
-  
-  public void putImageMeta(final int imageIndex, String key, Object value) {
-    imageMeta.get(imageIndex).getImageMetadata().put(key, value);
-  }
+  void setThumbSizeY(int imageIndex, int thumbY);
 
-  public void setThumbSizeX(final int imageIndex, final int thumbX) {
-    imageMeta.get(imageIndex).setThumbSizeX(thumbX);
-  }
+  void setPixelType(int imageIndex, int type);
 
-  public void setThumbSizeY(final int imageIndex, final int thumbY) {
-    imageMeta.get(imageIndex).setThumbSizeY(thumbY);
-  }
+  void setBitsPerPixel(int imageIndex, int bpp);
 
-  public void setPixelType(final int imageIndex, final int type) {
-    imageMeta.get(imageIndex).setPixelType(type);
-  }
+  void setChannelDimLengths(int imageIndex, int[] cLengths);
 
-  public void setBitsPerPixel(final int imageIndex, final int bpp) {
-    imageMeta.get(imageIndex).setBitsPerPixel(bpp);
-  }
+  void setChannelDimTypes(int imageIndex, String[] cTypes);
 
-  public void setChannelDimLengths(final int imageIndex, final int[] cLengths) {
-    imageMeta.get(imageIndex).setcLengths(cLengths);
-  }
+  void setOrderCertain(int imageIndex, boolean orderCertain);
 
-  public void setChannelDimTypes(final int imageIndex, final String[] cTypes) {
-    imageMeta.get(imageIndex).setcTypes(cTypes);
-  }
+  void setRGB(int imageIndex, boolean rgb);
 
-  public void setOrderCertain(final int imageIndex, final boolean orderCertain)
-  {
-    imageMeta.get(imageIndex).setOrderCertain(orderCertain);
-  }
+  void setLittleEndian(int imageIndex, boolean littleEndian);
 
-  public void setRGB(final int imageIndex, final boolean rgb) {
-    imageMeta.get(imageIndex).setRgb(rgb);
-  }
+  void setInterleaved(int imageIndex, boolean interleaved);
 
-  public void setLittleEndian(final int imageIndex, final boolean littleEndian)
-  {
-    imageMeta.get(imageIndex).setLittleEndian(littleEndian);
-  }
+  void setIndexed(int imageIndex, boolean indexed);
 
-  public void setInterleaved(final int imageIndex, final boolean interleaved) {
-    imageMeta.get(imageIndex).setInterleaved(interleaved);
-  }
+  void setFalseColor(int imageIndex, boolean falseC);
 
-  public void setIndexed(final int imageIndex, final boolean indexed) {
-    imageMeta.get(imageIndex).setIndexed(indexed);
-  }
+  void setMetadataComplete(int imageIndex, boolean metadataComplete);
 
-  public void setFalseColor(final int imageIndex, final boolean falseC) {
-    imageMeta.get(imageIndex).setFalseColor(falseC);
-  }
+  void setImageMetadata(int imageIndex, Hashtable<String, Object> meta);
 
-  public void setMetadataComplete(final int imageIndex,
-    final boolean metadataComplete)
-  {
-    imageMeta.get(imageIndex).setMetadataComplete(metadataComplete);
-  }
+  void setThumbnailImage(int imageIndex, boolean thumbnail);
 
-  public void setImageMetadata(final int imageIndex,
-    final Hashtable<String, Object> meta)
-  {
-    imageMeta.get(imageIndex).setImageMetadata(meta);
-  }
+  void setAxisTypes(int imageIndex, AxisType[] axisTypes);
 
-  public void setThumbnailImage(final int imageIndex, final boolean thumbnail) {
-    imageMeta.get(imageIndex).setThumbnail(thumbnail);
-  }
+  void setAxisType(int imageIndex, int axisIndex, AxisType axis);
 
-  public void setAxisTypes(final int imageIndex, final AxisType[] axisTypes) {
-    imageMeta.get(imageIndex).setAxisTypes(axisTypes);
-  }
-  
-  public void setAxisType(final int imageIndex, final int axisIndex, final AxisType axis) {
-    imageMeta.get(imageIndex).setAxisType(axisIndex, axis);
-  }
+  void setAxisLengths(int imageIndex, int[] axisLengths);
 
-  public void setAxisLengths(final int imageIndex, final int[] axisLengths) {
-    imageMeta.get(imageIndex).setAxisLengths(axisLengths);
-  }
-  
-  public void setAxisLength(final int imageIndex, final AxisType axis, final int length) {
-    imageMeta.get(imageIndex).setAxisLength(axis, length);
-  }
+  void setAxisLength(int imageIndex, AxisType axis, int length);
 
-  // -- Helper Methods --
+  void resetMeta();
 
-  public void resetMeta() {
-    super.reset(this.getClass());
-    datasetMeta = new Hashtable<String, Object>();
-    imageMeta = new ArrayList<ImageMetadata>();
-  }
+  Collection<M> getImageMetadata();
 
-  public Collection<ImageMetadata> getImageMetadata() {
-    return Collections.unmodifiableCollection(imageMeta);
-  }
+  void add(M meta);
 
-  public void add(final ImageMetadata meta) {
-    imageMeta.add(meta);
-  }
-
-  /*
-  public boolean isSingleFile() {
-    return this.size() <= 1;
-  }
-  
-  public boolean hasCompanionFiles() {
-    return false;
-  }
-  */
 }

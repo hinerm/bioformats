@@ -33,7 +33,6 @@
  * policies, either expressed or implied, of any organization.
  * #L%
  */
-
 package ome.scifio;
 
 import java.util.Hashtable;
@@ -41,306 +40,87 @@ import java.util.Hashtable;
 import net.imglib2.meta.AxisType;
 
 /**
- * ImageMetadata consists of the metadata fields common 
- * to any image type, expressed in a standardized way within
- *  SCIFIO.
+ * TODO
+ * 
+ * @author Mark Hiner
  *
  */
-public class ImageMetadata {
+public interface ImageMetadata {
 
-  // -- Fields --
+  void setThumbSizeX(int thumbSizeX);
 
-  /** Number of planes in this image */
-  @Field(label = "planeCount")
-  private int planeCount;
+  void setThumbSizeY(int thumbSizeY);
 
-  /** Width (in pixels) of thumbnail planes in this image. */
-  @Field(label = "thumbSizeX")
-  private int thumbSizeX;
+  void setPixelType(int pixelType);
 
-  /** Height (in pixels) of thumbnail planes in this image. */
-  @Field(label = "thumbSizeY")
-  private int thumbSizeY;
+  void setBitsPerPixel(int bitsPerPixel);
 
-  /**
-   * Describes the number of bytes per pixel.  Must be one of the <i>static</i>
-   * pixel types (e.g. <code>INT8</code>) in {@link ome.scifio.util.FormatTools}.
-   */
-  @Field(label = "pixelType")
-  private int pixelType;
+  void setChannelLengths(int[] cLengths);
 
-  /** Number of valid bits per pixel. */
-  @Field(label = "bitsPerPixel")
-  private int bitsPerPixel;
+  void setChannelTypes(String[] cTypes);
 
-  /** Length of each subdimension of C. */
-  @Field(label = "cLengths")
-  private int[] cLengths;
+  void setOrderCertain(boolean orderCertain);
 
-  /** Name of each subdimension of C. */
-  @Field(label = "cTypes")
-  private String[] cTypes;
+  void setRgb(boolean rgb);
 
-  /** The Axes types for this image. Order is implied by ordering within this array */
-  @Field(label = "dimTypes")
-  private AxisType[] axisTypes;
+  void setLittleEndian(boolean littleEndian);
 
-  /** Lengths of each axis. Order is parallel of dimTypes. */
-  @Field(label = "dimLengths")
-  private int[] axisLengths;
+  void setInterleaved(boolean interleaved);
 
-  /**
-   * Indicates whether or not we are confident that the
-   * dimension order is correct.
-   */
-  @Field(label = "orderCertain")
-  private boolean orderCertain;
+  void setIndexed(boolean indexed);
 
-  /**
-   * Indicates whether or not the images are stored as RGB
-   * (multiple channels per plane).
-   */
-  @Field(label = "rgb")
-  private boolean rgb;
+  void setFalseColor(boolean falseColor);
 
-  /** Indicates whether or not each pixel's bytes are in little endian order. */
-  @Field(label = "littleEndian")
-  private boolean littleEndian;
+  void setMetadataComplete(boolean metadataComplete);
 
-  /**
-   * True if channels are stored RGBRGBRGB...; false if channels are stored
-   * RRR...GGG...BBB...
-   */
-  @Field(label = "interleaved")
-  private boolean interleaved;
+  void setImageMetadata(Hashtable<String, Object> imageMetadata);
 
-  /** Indicates whether or not the images are stored as indexed color. */
-  @Field(label = "indexed")
-  private boolean indexed;
+  void setThumbnail(boolean thumbnail);
 
-  /** Indicates whether or not we can ignore the color map (if present). */
-  @Field(label = "falseColor")
-  private boolean falseColor = true;
+  void setAxisTypes(AxisType[] axisTypes);
 
-  /**
-   * Indicates whether or not we are confident that all of the metadata stored
-   * within the file has been parsed.
-   */
-  @Field(label = "metadataComplete")
-  private boolean metadataComplete;
+  void setAxisLengths(int[] axisLengths);
 
-  /** Non-core metadata associated with this series. */
-  @Field(label = "imageMetadata")
-  private Hashtable<String, Object> imageMetadata;
+  void setAxisLength(AxisType axis, int length);
 
-  /**
-   * Indicates whether or not this series is a lower-resolution copy of
-   * another series.
-   */
-  @Field(label = "thumbnail")
-  private boolean thumbnail;
+  void setAxisType(int index, AxisType axis);
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
+  void setPlaneCount(int planeCount);
 
-  // -- Constructors --
+  int getPlaneCount();
 
-  public ImageMetadata() {
-    imageMetadata = new Hashtable<String, Object>();
-  }
-  
-  public ImageMetadata(ImageMetadata copy) {
-    imageMetadata = (Hashtable<String, Object>) copy.imageMetadata.clone();
-    
-    axisLengths = copy.axisLengths.clone();
-    axisTypes = copy.axisTypes.clone();
-    bitsPerPixel = copy.bitsPerPixel;
-    cLengths = copy.cLengths.clone();
-    cTypes = copy.cTypes.clone();
-    falseColor = copy.falseColor;
-    indexed = copy.indexed;
-    interleaved = copy.interleaved;
-    littleEndian = copy.littleEndian;
-    metadataComplete = copy.metadataComplete;
-    orderCertain = copy.orderCertain;
-    pixelType = copy.pixelType;
-    planeCount = copy.planeCount;
-    rgb = copy.rgb;
-    thumbnail = copy.thumbnail;
-    thumbSizeX = copy.thumbSizeX;
-    thumbSizeY = copy.thumbSizeY;
-  }
+  int getThumbSizeX();
 
-  // -- Setters -- 
+  int getThumbSizeY();
 
-  public void setThumbSizeX(final int thumbSizeX) {
-    this.thumbSizeX = thumbSizeX;
-  }
+  int getPixelType();
 
-  public void setThumbSizeY(final int thumbSizeY) {
-    this.thumbSizeY = thumbSizeY;
-  }
+  int getBitsPerPixel();
 
-  public void setPixelType(final int pixelType) {
-    this.pixelType = pixelType;
-  }
+  int[] getChannelLengths();
 
-  public void setBitsPerPixel(final int bitsPerPixel) {
-    this.bitsPerPixel = bitsPerPixel;
-  }
+  String[] getChannelTypes();
 
-  public void setcLengths(final int[] cLengths) {
-    this.cLengths = cLengths;
-  }
+  AxisType[] getAxisTypes();
 
-  public void setcTypes(final String[] cTypes) {
-    this.cTypes = cTypes;
-  }
+  int[] getAxisLengths();
 
-  public void setOrderCertain(final boolean orderCertain) {
-    this.orderCertain = orderCertain;
-  }
+  boolean isOrderCertain();
 
-  public void setRgb(final boolean rgb) {
-    this.rgb = rgb;
-  }
+  boolean isRgb();
 
-  public void setLittleEndian(final boolean littleEndian) {
-    this.littleEndian = littleEndian;
-  }
+  boolean isLittleEndian();
 
-  public void setInterleaved(final boolean interleaved) {
-    this.interleaved = interleaved;
-  }
+  boolean isInterleaved();
 
-  public void setIndexed(final boolean indexed) {
-    this.indexed = indexed;
-  }
+  boolean isIndexed();
 
-  public void setFalseColor(final boolean falseColor) {
-    this.falseColor = falseColor;
-  }
+  boolean isFalseColor();
 
-  public void setMetadataComplete(final boolean metadataComplete) {
-    this.metadataComplete = metadataComplete;
-  }
+  boolean isMetadataComplete();
 
-  public void setImageMetadata(final Hashtable<String, Object> imageMetadata) {
-    this.imageMetadata = imageMetadata;
-  }
+  Hashtable<String, Object> getImageMetadata();
 
-  public void setThumbnail(final boolean thumbnail) {
-    this.thumbnail = thumbnail;
-  }
+  boolean isThumbnail();
 
-  public void setAxisTypes(final AxisType[] axisTypes) {
-    this.axisTypes = axisTypes;
-  }
-
-  public void setAxisLengths(final int[] axisLengths) {
-    this.axisLengths = axisLengths;
-  }
-
-  public void setAxisLength(final AxisType axis, final int length) {
-    for (int i = 0; i < axisTypes.length; i++) {
-      if (axisTypes[i] == axis) {
-        axisLengths[i] = length;
-      }
-    }
-  }
-
-  public void setAxisType(final int index, final AxisType axis) {
-    axisTypes[index] = axis;
-  }
-
-  public void setPlaneCount(final int planeCount) {
-    this.planeCount = planeCount;
-  }
-  
-  // -- Getters --
-    
-  public int getPlaneCount() {
-    return planeCount;
-  }
-
-  public int getThumbSizeX() {
-    return thumbSizeX;
-  }
-
-  public int getThumbSizeY() {
-    return thumbSizeY;
-  }
-
-  public int getPixelType() {
-    return pixelType;
-  }
-
-  public int getBitsPerPixel() {
-    return bitsPerPixel;
-  }
-
-  public int[] getcLengths() {
-    return cLengths;
-  }
-
-  public String[] getcTypes() {
-    return cTypes;
-  }
-
-  public AxisType[] getAxisTypes() {
-    return axisTypes;
-  }
-
-  public int[] getAxisLengths() {
-    return axisLengths;
-  }
-
-  public boolean isOrderCertain() {
-    return orderCertain;
-  }
-
-  public boolean isRgb() {
-    return rgb;
-  }
-
-  public boolean isLittleEndian() {
-    return littleEndian;
-  }
-
-  public boolean isInterleaved() {
-    return interleaved;
-  }
-
-  public boolean isIndexed() {
-    return indexed;
-  }
-
-  public boolean isFalseColor() {
-    return falseColor;
-  }
-
-  public boolean isMetadataComplete() {
-    return metadataComplete;
-  }
-
-  public Hashtable<String, Object> getImageMetadata() {
-    return imageMetadata;
-  }
-
-  public boolean isThumbnail() {
-    return thumbnail;
-  }
-
-  public static long getSerialversionuid() {
-    return serialVersionUID;
-  }
-
-  // -- Object API --
-  
-  @Override
-  public String toString() {
-    return new FieldPrinter(this).toString();
-  }
 }
