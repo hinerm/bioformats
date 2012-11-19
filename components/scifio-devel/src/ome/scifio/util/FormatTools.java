@@ -56,8 +56,6 @@ import ome.scifio.io.RandomAccessInputStream;
  * A collection of constants and utility methods applicable for all
  * cycles of image processing within SCIFIO.
  * 
- * Also provides a default context (SCIFIO object) 
- * 
  * @author Mark Hiner
  *
  */
