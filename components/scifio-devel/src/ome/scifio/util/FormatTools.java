@@ -1064,10 +1064,10 @@ public class FormatTools {
         int height = reader.getDatasetMetadata().getThumbSizeY(imageIndex) * 4;
         int x = (reader.getDatasetMetadata().getAxisLength(imageIndex, Axes.X) - width) / 2;
         int y = (reader.getDatasetMetadata().getAxisLength(imageIndex, Axes.Y) - height) / 2;
-        plane = reader.openBytes(imageIndex, planeIndex, x, y, width, height);
+        plane = reader.openPlane(imageIndex, planeIndex, x, y, width, height);
       }
       else {
-        plane = reader.openBytes(imageIndex, planeIndex);
+        plane = reader.openPlane(imageIndex, planeIndex);
       }
 
       r.setVar("plane", plane);
@@ -1117,7 +1117,7 @@ public class FormatTools {
     
     for(int i = 0; i < input.getImageCount(); i++) {
       for(int j = 0; j < input.getPlaneCount(i); j++) {
-        bytes = input.openBytes(i, j);
+        bytes = input.openPlane(i, j);
         output.saveBytes(i, j, bytes);
       }
     }

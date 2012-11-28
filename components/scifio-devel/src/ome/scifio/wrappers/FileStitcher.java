@@ -479,8 +479,8 @@ public class FileStitcher<M extends Metadata> extends ReaderWrapper<M> {
   }
 
   /* @see Reader#openBytes(int) */
-  public byte[] openBytes(int imageIndex, int planeIndex) throws FormatException, IOException {
-    return openBytes(imageIndex, planeIndex, 0, 0, getDimensionLength(imageIndex, Axes.X),
+  public byte[] openPlane(int imageIndex, int planeIndex) throws FormatException, IOException {
+    return openPlane(imageIndex, planeIndex, 0, 0, getDimensionLength(imageIndex, Axes.X),
       getDimensionLength(imageIndex, Axes.Y));
   }
 
@@ -493,7 +493,7 @@ public class FileStitcher<M extends Metadata> extends ReaderWrapper<M> {
   }
 
   /* @see Reader#openBytes(int, int, int, int, int) */
-  public byte[] openBytes(int imageIndex, int planeIndex, int x, int y, int w, int h)
+  public byte[] openPlane(int imageIndex, int planeIndex, int x, int y, int w, int h)
     throws FormatException, IOException
   {
     int bpp = FormatTools.getBytesPerPixel(getPixelType(imageIndex));
@@ -512,7 +512,7 @@ public class FileStitcher<M extends Metadata> extends ReaderWrapper<M> {
     Reader r = getReader(imageIndex, pos[0]);
     int ino = pos[1];
 
-    if (ino < getPlaneCount(imageIndex, r)) return r.openBytes(imageIndex, ino, buf, x, y, w, h);
+    if (ino < getPlaneCount(imageIndex, r)) return r.openPlane(imageIndex, ino, buf, x, y, w, h);
 
     // return a blank image to cover for the fact that
     // this file does not contain enough image planes
@@ -534,12 +534,12 @@ public class FileStitcher<M extends Metadata> extends ReaderWrapper<M> {
   }
 
   /* @see Reader#openThumbBytes(int) */
-  public byte[] openThumbBytes(int imageIndex, int planeIndex) throws FormatException, IOException {
+  public byte[] openThumbPlane(int imageIndex, int planeIndex) throws FormatException, IOException {
     FormatTools.assertId(getCurrentFile(), true, 2);
 
     Reader r = getReader(imageIndex, planeIndex);
     int ino = getAdjustedIndex(imageIndex, planeIndex);
-    if (ino < getPlaneCount(imageIndex, r)) return r.openThumbBytes(imageIndex, ino);
+    if (ino < getPlaneCount(imageIndex, r)) return r.openThumbPlane(imageIndex, ino);
 
     // return a blank image to cover for the fact that
     // this file does not contain enough image planes

@@ -34,7 +34,7 @@ public class WriterConvenienceExample {
 			
 			for(int i = 0; i < r.getImageCount(); i++) {
 				for(int j = 0; j < r.getPlaneCount(i); j++) {
-					byte[] bytes = r.openBytes(i, j);
+					byte[] bytes = r.openPlane(i, j);
 					w.saveBytes(i, j, bytes);
 				}
 			}

@@ -108,32 +108,32 @@ public abstract class DelegateReader <M extends Metadata> extends AbstractReader
   
   // -- Reader API methods --
 
-  public byte[] openBytes(int imageIndex, int planeIndex)
+  public byte[] openPlane(int imageIndex, int planeIndex)
     throws FormatException, IOException
   {
-    return useLegacy ? legacyReader.openBytes(imageIndex, planeIndex)
-      : nativeReader.openBytes(imageIndex, planeIndex);
+    return useLegacy ? legacyReader.openPlane(imageIndex, planeIndex)
+      : nativeReader.openPlane(imageIndex, planeIndex);
   }
 
-  public byte[] openBytes(int imageIndex, int planeIndex, int x, int y, int w,
+  public byte[] openPlane(int imageIndex, int planeIndex, int x, int y, int w,
     int h) throws FormatException, IOException
   {
-    return useLegacy ? legacyReader.openBytes(imageIndex, planeIndex, x, y, w, h) 
-      : nativeReader.openBytes(imageIndex, planeIndex, x, y, w, h);
+    return useLegacy ? legacyReader.openPlane(imageIndex, planeIndex, x, y, w, h) 
+      : nativeReader.openPlane(imageIndex, planeIndex, x, y, w, h);
   }
 
   public byte[] openBytes(int imageIndex, int planeIndex, byte[] buf)
     throws FormatException, IOException
   {
-    return useLegacy ? legacyReader.openBytes(imageIndex, planeIndex, buf) 
-      : nativeReader.openBytes(imageIndex, planeIndex, buf);
+    return useLegacy ? legacyReader.openPlane(imageIndex, planeIndex, buf) 
+      : nativeReader.openPlane(imageIndex, planeIndex, buf);
   }
 
   public byte[] openBytes(int imageIndex, int planeIndex, byte[] buf, int x,
     int y, int w, int h) throws FormatException, IOException
   {
-    return useLegacy ? legacyReader.openBytes(imageIndex, planeIndex, buf, x, y, w, h) :
-      nativeReader.openBytes(imageIndex, planeIndex, buf, x, y, w, h);
+    return useLegacy ? legacyReader.openPlane(imageIndex, planeIndex, buf, x, y, w, h) :
+      nativeReader.openPlane(imageIndex, planeIndex, buf, x, y, w, h);
   }
 
   public Object openPlane(int imageIndex, int planeIndex, int x, int y, int w,
@@ -143,11 +143,11 @@ public abstract class DelegateReader <M extends Metadata> extends AbstractReader
       : nativeReader.openPlane(imageIndex, planeIndex, x, y, w, h);
   }
 
-  public byte[] openThumbBytes(int imageIndex, int planeIndex)
+  public byte[] openThumbPlane(int imageIndex, int planeIndex)
     throws FormatException, IOException
   {
-    return useLegacy ? legacyReader.openThumbBytes(imageIndex, planeIndex) 
-      : nativeReader.openThumbBytes(imageIndex, planeIndex);
+    return useLegacy ? legacyReader.openThumbPlane(imageIndex, planeIndex) 
+      : nativeReader.openThumbPlane(imageIndex, planeIndex);
   }
 
   public void setGroupFiles(boolean group) {

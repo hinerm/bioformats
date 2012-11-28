@@ -177,28 +177,28 @@ public abstract class ReaderWrapper<M extends Metadata> extends AbstractReader<M
   
   // -- Reader API methods -- 
 
-  public byte[] openBytes(int imageIndex, int planeIndex)
+  public byte[] openPlane(int imageIndex, int planeIndex)
     throws FormatException, IOException
   {
-    return reader.openBytes(imageIndex, planeIndex);
+    return reader.openPlane(imageIndex, planeIndex);
   }
 
-  public byte[] openBytes(int imageIndex, int planeIndex, int x, int y, int w,
+  public byte[] openPlane(int imageIndex, int planeIndex, int x, int y, int w,
     int h) throws FormatException, IOException
   {
-    return reader.openBytes(imageIndex, planeIndex, x, y, w, h);
+    return reader.openPlane(imageIndex, planeIndex, x, y, w, h);
   }
 
   public byte[] openBytes(int imageIndex, int planeIndex, byte[] buf)
     throws FormatException, IOException
   {
-    return reader.openBytes(imageIndex, planeIndex, buf);
+    return reader.openPlane(imageIndex, planeIndex, buf);
   }
 
   public byte[] openBytes(int imageIndex, int planeIndex, byte[] buf, int x,
     int y, int w, int h) throws FormatException, IOException
   {
-    return reader.openBytes(imageIndex, planeIndex, buf, x, y, w, h);
+    return reader.openPlane(imageIndex, planeIndex, buf, x, y, w, h);
   }
 
   public Object openPlane(int imageIndex, int planeIndex, int x, int y, int w,
@@ -207,10 +207,10 @@ public abstract class ReaderWrapper<M extends Metadata> extends AbstractReader<M
     return reader.openPlane(imageIndex, planeIndex, x, y, w, h);
   }
 
-  public byte[] openThumbBytes(int imageIndex, int planeIndex)
+  public byte[] openThumbPlane(int imageIndex, int planeIndex)
     throws FormatException, IOException
   {
-    return reader.openThumbBytes(imageIndex, planeIndex);
+    return reader.openThumbPlane(imageIndex, planeIndex);
   }
 
   public void setGroupFiles(boolean group) {

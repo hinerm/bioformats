@@ -67,7 +67,7 @@ public abstract class BIFormatReader<M extends Metadata>
   // -- Reader API methods --
 
   /**
-   * @see ome.scifio.Reader#openBytes(int, byte[], int, int, int, int)
+   * @see ome.scifio.Reader#openPlane(int, byte[], int, int, int, int)
    */
   @Override
   public byte[] openBytes(final int imageIndex, final int planeIndex, final byte[] buf, final int x,

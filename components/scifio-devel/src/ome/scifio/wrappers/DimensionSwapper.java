@@ -176,15 +176,15 @@ public class DimensionSwapper<M extends Metadata> extends ReaderWrapper<M> {
   // -- Reader API methods --
 
   /* @see Reader#openBytes(int) */
-  public byte[] openBytes(int imageIndex, int planeIndex) throws FormatException, IOException {
-    return super.openBytes(imageIndex, reorder(imageIndex, planeIndex));
+  public byte[] openPlane(int imageIndex, int planeIndex) throws FormatException, IOException {
+    return super.openPlane(imageIndex, reorder(imageIndex, planeIndex));
   }
 
   /* @see Reader#openBytes(int, int, int, int, int) */
-  public byte[] openBytes(int imageIndex, int planeIndex, int x, int y, int w, int h)
+  public byte[] openPlane(int imageIndex, int planeIndex, int x, int y, int w, int h)
     throws FormatException, IOException
   {
-    return super.openBytes(imageIndex, reorder(imageIndex, planeIndex), x, y, w, h);
+    return super.openPlane(imageIndex, reorder(imageIndex, planeIndex), x, y, w, h);
   }
 
   /* @see Reader#openBytes(int, byte[]) */
@@ -202,8 +202,8 @@ public class DimensionSwapper<M extends Metadata> extends ReaderWrapper<M> {
   }
 
   /* @see Reader#openThumbImage(int) */
-  public byte[] openThumbBytes(int imageIndex, int planeIndex) throws FormatException, IOException {
-    return super.openThumbBytes(imageIndex, reorder(imageIndex, planeIndex));
+  public byte[] openThumbPlane(int imageIndex, int planeIndex) throws FormatException, IOException {
+    return super.openThumbPlane(imageIndex, reorder(imageIndex, planeIndex));
   }
 
   /* @see Reader#getZCTCoords(int) */

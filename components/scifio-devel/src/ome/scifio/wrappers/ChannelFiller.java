@@ -177,8 +177,8 @@ public class ChannelFiller<M extends Metadata> extends ReaderWrapper<M> {
 
   /* @see Reader#openBytes(int) */
   @Override
-  public byte[] openBytes(int imageIndex, int planeIndex) throws FormatException, IOException {
-    return openBytes(imageIndex, planeIndex, 0, 0, 
+  public byte[] openPlane(int imageIndex, int planeIndex) throws FormatException, IOException {
+    return openPlane(imageIndex, planeIndex, 0, 0, 
       datasetMeta().getAxisLength(imageIndex, Axes.X), datasetMeta().getAxisLength(imageIndex, Axes.Y));
   }
 
@@ -193,7 +193,7 @@ public class ChannelFiller<M extends Metadata> extends ReaderWrapper<M> {
 
   /* @see Reader#openBytes(int, int, int, int, int) */
   @Override
-  public byte[] openBytes(int imageIndex, int planeIndex, int x, int y, int w, int h)
+  public byte[] openPlane(int imageIndex, int planeIndex, int x, int y, int w, int h)
     throws FormatException, IOException
   {
     byte[] buf = DataTools.allocate(w, h, datasetMeta().getRGBChannelCount(imageIndex),
@@ -206,7 +206,7 @@ public class ChannelFiller<M extends Metadata> extends ReaderWrapper<M> {
   public byte[] openBytes(int imageIndex, int planeIndex, byte[] buf, int x, int y, int w, int h)
     throws FormatException, IOException
   {
-    if (!isFilled(imageIndex)) return getReader().openBytes(imageIndex, planeIndex, buf, x, y, w, h);
+    if (!isFilled(imageIndex)) return getReader().openPlane(imageIndex, planeIndex, buf, x, y, w, h);
 
     // TODO: The pixel type should change to match the available color table.
     // That is, even if the indices are uint8, if the color table is 16-bit,
@@ -216,7 +216,7 @@ public class ChannelFiller<M extends Metadata> extends ReaderWrapper<M> {
 
     // TODO: This logic below is opaque and could use some comments.
 
-    byte[] pix = getReader().openBytes(imageIndex, planeIndex, x, y, w, h);
+    byte[] pix = getReader().openPlane(imageIndex, planeIndex, x, y, w, h);
     if (datasetMeta().getPixelType(imageIndex) == FormatTools.UINT8) {
       byte[][] b = ImageTools.indexedToRGB(get8BitLookupTable(imageIndex), pix);
       if (datasetMeta().isInterleaved(imageIndex)) {

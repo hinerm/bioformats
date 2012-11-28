@@ -19,7 +19,7 @@ public class ReaderConvenienceExample {
     try {
       ctx = new SCIFIO();
       r = ctx.initializeReader(testFile);
-      byte[] bytes = r.openBytes(0, 0);
+      byte[] bytes = r.openPlane(0, 0);
       r.close();
       
       System.out.println("Num bytes:" + bytes.length);

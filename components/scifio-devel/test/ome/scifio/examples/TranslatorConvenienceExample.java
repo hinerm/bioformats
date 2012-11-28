@@ -35,7 +35,7 @@ public class TranslatorConvenienceExample {
 			
 			for(int i = 0; i < r.getImageCount(); i++) {
 				for(int j = 0; j < r.getPlaneCount(i); j++) {
-					bytes = r.openBytes(i, j);
+					bytes = r.openPlane(i, j);
 					w.saveBytes(i, j, bytes);
 				}
 			}

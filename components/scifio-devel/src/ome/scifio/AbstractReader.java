@@ -141,16 +141,16 @@ public abstract class AbstractReader<M extends Metadata>
   }
 
   /* @see Reader#openBytes(int, int) */
-  public byte[] openBytes(final int imageIndex, final int planeNumber)
+  public byte[] openPlane(final int imageIndex, final int planeNumber)
     throws FormatException, IOException
   {
-    return openBytes(
+    return openPlane(
       imageIndex, planeNumber, 0, 0, dMeta.getAxisLength(imageIndex, Axes.X),
       dMeta.getAxisLength(imageIndex, Axes.Y));
   }
 
   /* @see Reader#openBytes(int, int, int, int, int, int) */
-  public byte[] openBytes(final int imageIndex, final int planeIndex,
+  public byte[] openPlane(final int imageIndex, final int planeIndex,
     final int x, final int y, final int w, final int h)
     throws FormatException, IOException
   {
@@ -181,7 +181,7 @@ public abstract class AbstractReader<M extends Metadata>
     throws FormatException, IOException
   {
     // NB: Readers use byte arrays by default as the native type.
-    return openBytes(imageIndex, planeIndex, x, y, w, h);
+    return openPlane(imageIndex, planeIndex, x, y, w, h);
   }
 
   /* @see Reader#readPlane(RandomAccessInputStream, int, int, int, int, int, int, byte[] */
@@ -254,7 +254,7 @@ public abstract class AbstractReader<M extends Metadata>
   }
 
   /* @see Reader#openThumbBytes(int) */
-  public byte[] openThumbBytes(final int imageIndex, final int planeIndex)
+  public byte[] openThumbPlane(final int imageIndex, final int planeIndex)
     throws FormatException, IOException
   {
     FormatTools.assertStream(in, true, 1);

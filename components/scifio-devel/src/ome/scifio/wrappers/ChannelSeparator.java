@@ -156,8 +156,8 @@ public class ChannelSeparator<M extends Metadata> extends ReaderWrapper<M> {
   }
 
   /* @see Reader#openBytes(int, int) */
-  public byte[] openBytes(int imageIndex, int planeIndex) throws FormatException, IOException {
-    return openBytes(imageIndex, planeIndex, 0, 0, datasetMeta().getAxisLength(imageIndex, Axes.X),
+  public byte[] openPlane(int imageIndex, int planeIndex) throws FormatException, IOException {
+    return openPlane(imageIndex, planeIndex, 0, 0, datasetMeta().getAxisLength(imageIndex, Axes.X),
       datasetMeta().getAxisLength(imageIndex, Axes.Y));
   }
 
@@ -170,7 +170,7 @@ public class ChannelSeparator<M extends Metadata> extends ReaderWrapper<M> {
   }
 
   /* @see Reader#openBytes(int, int, int, int, int, int) */
-  public byte[] openBytes(int imageIndex, int planeIndex, int x, int y, int w, int h)
+  public byte[] openPlane(int imageIndex, int planeIndex, int x, int y, int w, int h)
     throws FormatException, IOException
   {
     byte[] buf =
@@ -213,7 +213,7 @@ public class ChannelSeparator<M extends Metadata> extends ReaderWrapper<M> {
         int lastStripHeight = stripHeight + (h - (stripHeight * strips));
         byte[] strip = strips == 1 ? buf : new byte[stripHeight * w * bpp];
         for (int i=0; i<strips; i++) {
-          lastPlane = getReader().openBytes(imageIndex, source, x, y + i * stripHeight, w,
+          lastPlane = getReader().openPlane(imageIndex, source, x, y + i * stripHeight, w,
             i == strips - 1 ? lastStripHeight : stripHeight);
           lastPlaneIndex = source;
           lastImageIndex = imageIndex;
@@ -242,15 +242,15 @@ public class ChannelSeparator<M extends Metadata> extends ReaderWrapper<M> {
 
       return buf;
     }
-    return getReader().openBytes(imageIndex, planeIndex, buf, x, y, w, h);
+    return getReader().openPlane(imageIndex, planeIndex, buf, x, y, w, h);
   }
 
   /* @see Reader#openThumbBytes(int) */
-  public byte[] openThumbBytes(int imageIndex, int planeIndex) throws FormatException, IOException {
+  public byte[] openThumbPlane(int imageIndex, int planeIndex) throws FormatException, IOException {
     FormatTools.assertId(getCurrentFile(), true, 2);
 
     int source = getOriginalIndex(imageIndex, planeIndex);
-    byte[] thumb = getReader().openThumbBytes(imageIndex, planeIndex);
+    byte[] thumb = getReader().openThumbPlane(imageIndex, planeIndex);
 
     int c = datasetMeta().getAxisLength(imageIndex, Axes.CHANNEL) /
       datasetMeta().getEffectiveSizeC(imageIndex);
