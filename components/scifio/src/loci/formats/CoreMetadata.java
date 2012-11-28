@@ -203,7 +203,7 @@ public class CoreMetadata {
     cTypes = imgMeta.getChannelTypes();
     dimensionOrder = ome.scifio.util.FormatTools.findDimensionOrder(imgMeta.getAxisTypes());
     orderCertain = imgMeta.isOrderCertain();
-    rgb = imgMeta.isRgb();
+    rgb = imgMeta.isRGB();
     littleEndian = imgMeta.isLittleEndian();
     interleaved = imgMeta.isInterleaved();
     indexed = imgMeta.isIndexed();
@@ -312,7 +312,7 @@ public class CoreMetadata {
     coreImg.setChannelLengths(cLengths);
     coreImg.setChannelTypes(cTypes);
     coreImg.setOrderCertain(orderCertain);
-    coreImg.setRgb(rgb);
+    coreImg.setRGB(rgb);
     coreImg.setLittleEndian(littleEndian);
     coreImg.setInterleaved(interleaved);
     coreImg.setIndexed(indexed);
