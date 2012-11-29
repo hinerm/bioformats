@@ -42,7 +42,7 @@ import java.io.IOException;
 import ome.scifio.io.RandomAccessInputStream;
 
 /**
- * Interface for all SciFIO Readers.
+ * Interface for all SCIFIO Readers.
  *
  * <dl><dt><b>Source code:</b></dt>
  * <dd><a href="">Trac</a>,
@@ -51,7 +51,7 @@ import ome.scifio.io.RandomAccessInputStream;
  * @param <M> - {@link Metadata} used by this reader for reading images.
  * @param <P> - {@link Plane} type returned by this reader.
  */
-public interface Reader<M extends Metadata, P extends Plane<?>> extends HasContext, HasFormat {
+public interface Reader<M extends Metadata, P extends Plane> extends HasContext, HasFormat {
 
   // -- Reader API methods --
 
@@ -136,7 +136,7 @@ public interface Reader<M extends Metadata, P extends Plane<?>> extends HasConte
    * Retrieves all underlying readers.
    * Returns null if there are no underlying readers.
    */
-  Reader<M, P>[] getUnderlyingReaders();
+  Reader<? extends Metadata, ? extends Plane>[] getUnderlyingReaders();
 
   /** Returns the optimal sub-image width for use with {@link #openPlane}. */
   int getOptimalTileWidth(int imageIndex);
@@ -205,4 +205,14 @@ public interface Reader<M extends Metadata, P extends Plane<?>> extends HasConte
 
   /** Determines the number of images in the current file. */
   int getImageCount();
+  
+  /** 
+   * Creates a blank plane compatible with this reader.
+   * @param xOffset
+   * @param yOffset
+   * @param xLength
+   * @param yLength
+   * @return
+   */
+  P createPlane(int xOffset, int yOffset, int xLength, int yLength);
 }

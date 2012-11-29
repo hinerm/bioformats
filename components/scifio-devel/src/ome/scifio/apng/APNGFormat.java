@@ -58,6 +58,7 @@ import ome.scifio.AbstractMetadata;
 import ome.scifio.AbstractParser;
 import ome.scifio.AbstractTranslator;
 import ome.scifio.AbstractWriter;
+import ome.scifio.BufferedImagePlane;
 import ome.scifio.DefaultDatasetMetadata;
 import ome.scifio.DefaultImageMetadata;
 import ome.scifio.CoreTranslator;
@@ -69,7 +70,7 @@ import ome.scifio.common.DataTools;
 import ome.scifio.discovery.SCIFIOFormat;
 import ome.scifio.discovery.SCIFIOTranslator;
 import ome.scifio.gui.AWTImageTools;
-import ome.scifio.gui.BIFormatReader;
+import ome.scifio.gui.BufferedImageReader;
 import ome.scifio.io.RandomAccessInputStream;
 import ome.scifio.io.RandomAccessOutputStream;
 import ome.scifio.io.StreamTools;
@@ -400,7 +401,7 @@ public class APNGFormat
    * images.
    * 
    */
-  public static class Reader extends BIFormatReader<Metadata> {
+  public static class Reader extends BufferedImageReader<Metadata> {
   
     // -- Fields --
   
@@ -426,7 +427,7 @@ public class APNGFormat
   
     /* @see ome.scifio.Reader#openPlane(int, int, int, int, int) */
     @Override
-    public Object openPlane(final int imageIndex, final int planeIndex, final int x, final int y, final int w,
+    public BufferedImagePlane readPlane(final int imageIndex, final int planeIndex, final int x, final int y, final int w,
       final int h) throws FormatException, IOException
     {
       FormatTools.checkPlaneParameters(

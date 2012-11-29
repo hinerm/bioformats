@@ -38,7 +38,11 @@ package ome.scifio.gui;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
+import net.imglib2.display.ColorTable16;
+import net.imglib2.display.ColorTable8;
 import ome.scifio.AbstractReader;
+import ome.scifio.BufferedImagePlane;
 import ome.scifio.FormatException;
 import ome.scifio.Metadata;
 import ome.scifio.SCIFIO;
@@ -46,7 +50,7 @@ import ome.scifio.common.DataTools;
 import ome.scifio.util.FormatTools;
 
 /**
- * BIFormatReader is the superclass for file format readers
+ * BufferedImageReader is the superclass for file format readers
  * that use java.awt.image.BufferedImage as the native data type.
  *
  * <dl><dt><b>Source code:</b></dt>
@@ -55,12 +59,12 @@ import ome.scifio.util.FormatTools;
  *
  * @author Curtis Rueden ctrueden at wisc.edu
  */
-public abstract class BIFormatReader<M extends Metadata>
-  extends AbstractReader<M> {
+public abstract class BufferedImageReader<M extends Metadata>
+  extends AbstractReader<M, BufferedImagePlane> {
   // -- Constructors --
 
   /** Constructs a new BIFormatReader. */
-  public BIFormatReader(final SCIFIO ctx) {
+  public BufferedImageReader(final SCIFIO ctx) {
     super(ctx);
   }
 
@@ -70,35 +74,40 @@ public abstract class BIFormatReader<M extends Metadata>
    * @see ome.scifio.Reader#openPlane(int, byte[], int, int, int, int)
    */
   @Override
-  public byte[] openBytes(final int imageIndex, final int planeIndex, final byte[] buf, final int x,
+  public BufferedImagePlane openPlane(final int imageIndex, 
+    final int planeIndex, final BufferedImagePlane plane, final int x,
     final int y, final int w, final int h) throws FormatException, IOException
   {
     FormatTools.checkPlaneParameters(
-      this, imageIndex, planeIndex, buf.length, x, y, w, h);
+      this, imageIndex, planeIndex, plane.getSize(), x, y, w, h);
 
-    final BufferedImage data =
-      (BufferedImage) openPlane(imageIndex, planeIndex, x, y, w, h);
-    switch (data.getColorModel().getComponentSize(0)) {
-      case 8:
-        final byte[] t = AWTImageTools.getBytes(data, false);
-        System.arraycopy(t, 0, buf, 0, Math.min(t.length, buf.length));
+    final BufferedImagePlane tempPlane =
+      openPlane(imageIndex, planeIndex, x, y, w, h);
+    if(tempPlane.getColorTable() instanceof ColorTable8) {
+        final byte[] t = AWTImageTools.getBytes(tempPlane.getData(), false);
+        System.arraycopy(t, 0, plane, 0, Math.min(t.length, plane.getSize()));
         break;
-      case 16:
-        final short[][] ts = AWTImageTools.getShorts(data);
+    }
+    else if(tempPlane.getColorTable() instanceof ColorTable16) {
+        final short[][] ts = AWTImageTools.getShorts(tempPlane.getData());
         for (int c = 0; c < ts.length; c++) {
           int offset = c * ts[c].length * 2;
-          for (int i = 0; i < ts[c].length && offset < buf.length; i++) {
+          for (int i = 0; i < ts[c].length && offset < plane.length; i++) {
             DataTools.unpackBytes(
-              ts[c][i], buf, offset, 2, dMeta.isLittleEndian(planeIndex));
+              ts[c][i], plane.getBytes(), offset, 2, dMeta.isLittleEndian(planeIndex));
             offset += 2;
           }
         }
         break;
     }
-    return buf;
+    return plane;
+  }
+  
+  public BufferedImagePlane createPlane() {
+    return new BufferedImagePlane(getContext());
   }
 
-  // -- BIFormatReader methods --
+  // -- BufferedImageReader methods --
 
   public Class<?> getNativeDataType() {
     return BufferedImage.class;

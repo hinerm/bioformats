@@ -40,9 +40,9 @@ import net.imglib2.display.ColorTable;
 /**
  * Top-level interface for all Plane representations in SCIFIO.
  * <p>
- * Planes are essentially structs for an array of pixel data and
- * potentially a {@link net.imglib2.display.ColorTable} if the 
- * plane comes from an indexed color image.
+ * Planes are X,Y slices of pixel data from a parent image, and
+ * potentially include a {@link net.imglib2.display.ColorTable} if that
+ * parent uses indexed color.
  * </p>
  * <p>
  * This interface guarantees that a Plane will have a ColorTable, and
@@ -77,4 +77,86 @@ public interface Plane extends HasContext {
    * @return The standardized representation of this plane's data.
    */
   byte[] getBytes();
+  
+  /**
+   * Gets the {@link ImageMetadata} associated with this plane. The
+   * ImageMetadata returned by this method can then be used to answer questions
+   * about this plane.
+   * 
+   * @return An ImageMetadata instance describing the image associated with
+   *         this plane.
+   */
+  ImageMetadata getImageMetadata();
+  
+  /**
+   * @return
+   */
+  int getxOffset();
+  
+  /**
+   * @return
+   */
+  int getyOffset();
+  
+  /**
+   * @return
+   */
+  int getxLength();
+  
+  /**
+   * @return
+   */
+  int getyLength();
+  
+  /**
+   * 
+   * 
+   * @param meta
+   * @param xOffset
+   * @param yOffset
+   * @param xLength
+   * @param yLength
+   */
+  void populate(ImageMetadata meta, int xOffset, int yOffset, int xLength,
+       int yLength);
+  
+  
+  /**
+   * Sets the ImageMetadata representation of the underlying image.
+   * 
+   * @param meta - an initialized ImageMetadata instance.
+   */
+  void setImageMetadata(ImageMetadata meta);
+  
+  /**
+   * Sets this plane's position in the X axis of the underlying image.
+   * 
+   * @param x - the new x-offset for this plane.
+   *        NB: x-offset + x-length <= image width
+   */
+  void setxOffset(int x);
+  
+  /**
+   * Sets this plane's position in the Y axis of the underlying image.
+   * 
+   * @param y - the new y-offset for this plane.
+   *        NB: y-offset + y-length <= image height
+   */
+  void setyOffset(int y);
+  
+  /**
+   * Sets this plane's length in the X axis of the underlying image.
+   * 
+   * @param length - the new x-length for this plane.
+   *        NB: x-offset + x-length <= image width
+   */
+  void setxLength(int length);
+  
+  /**
+   * Sets this plane's length in the Y axis of the underlying image.
+   * 
+   * @param length - the new y-length for this plane.
+   *        NB: y-offset + y-length <= image width
+   */
+  void setyLength(int length);
 }

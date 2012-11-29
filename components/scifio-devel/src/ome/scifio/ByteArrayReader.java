@@ -35,59 +35,21 @@
  */
 package ome.scifio;
 
-import java.awt.image.BufferedImage;
-
-import net.imglib2.meta.Axes;
-
-import ome.scifio.gui.AWTImageTools;
-import ome.scifio.util.FormatTools;
-
-/**
- * A {@link Plane} implementation using a {@link BufferedImage} for the
- * underlying data representation.
- * 
- * @author Mark Hiner
- *
- */
-public class BufferedImagePlane extends AbstractPlane<BufferedImage> {
+public abstract class ByteArrayReader<M extends Metadata>
+  extends AbstractReader<M, ByteArrayPlane> {
 
   // -- Constructor --
   
-  public BufferedImagePlane(SCIFIO ctx) {
+  public ByteArrayReader(SCIFIO ctx) {
     super(ctx);
   }
-  
-  public BufferedImagePlane(SCIFIO ctx, ImageMetadata meta, int xOffset,
-      int yOffset, int xLength, int yLength) {
-    super(ctx, meta, xOffset, yOffset, xLength, yLength);
-    
-    byte[] bytes = new byte[xLength * yLength * 
-                      (getImageMetadata().getBitsPerPixel() / 8) *
-                      meta.getAxisLength(Axes.CHANNEL)];
-    
-    int type = meta.getPixelType();
-    boolean signed = type == FormatTools.INT8 || type == FormatTools.INT16 ||
-                     type == FormatTools.INT32;
-    
-    BufferedImage img = AWTImageTools.makeImage(bytes, xLength, yLength,
-                        signed);
-    
-    setData(img);
-  }
 
-  // -- Plane API methods --
+  // -- Reader API Methods --
   
-  /**
-   * Standardizes this plane's {@link BufferedImage} to a byte[].
-   * <p>
-   * NB: If this plane contains multiple channels, the planes for each channel
-   * will be condensed to a single array. The first entry for each channel's
-   * data will have an offset of:
-   * <p><code>channelIndex * planeSize</code></p>
-   * </p>
-   */
-  public byte[] getBytes() {
-    return AWTImageTools.getBytes(getData(), false);
+  public ByteArrayPlane createPlane(int xOffset, int yOffset, int xLength,
+      int yLength) {
+    return new ByteArrayPlane(getContext(), getDatasetMetadata().get(0),
+        xOffset, yOffset, xLength, yLength);
   }
-
+  
 }

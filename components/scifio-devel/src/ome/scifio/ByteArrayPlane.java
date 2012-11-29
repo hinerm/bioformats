@@ -35,6 +35,8 @@
  */
 package ome.scifio;
 
+import net.imglib2.meta.Axes;
+
 /**
  * A naive {@link Plane} implementation that uses byte[] for its underlying
  * data type.
@@ -49,6 +51,12 @@ public class ByteArrayPlane extends AbstractPlane<byte[]> {
   public ByteArrayPlane(SCIFIO ctx) {
     super(ctx);
   }
+
+  public ByteArrayPlane(SCIFIO ctx, ImageMetadata meta, int xOffset,
+      int yOffset, int xLength, int yLength) {
+    super(ctx, meta, xOffset, yOffset, xLength, yLength);
+    setData(new byte[xLength * yLength * (getImageMetadata().getBitsPerPixel() / 8) * meta.getAxisLength(Axes.CHANNEL)]);
+  }
   
   // -- Plane API methods --
 
@@ -56,6 +64,6 @@ public class ByteArrayPlane extends AbstractPlane<byte[]> {
    * @see ome.scifio.Plane#getBytes()
    */
   public byte[] getBytes() {
-    return super.getData();
+    return getData();
   }
 }

@@ -61,4 +61,28 @@ public interface DataPlane<T> extends Plane {
    * @return The native representation for this plane's data.
    */
   T getData();
+  
+  /**
+   * 
+   * 
+   * @param data
+   * @param xOffset
+   * @param yOffset
+   * @param xLength
+   * @param yLength
+   */
+  void populate(T data, int xOffset, int yOffset, int xLength, int yLength);
+  
+  /**
+   * 
+   * 
+   * @param meta
+   * @param data
+   * @param xOffset
+   * @param yOffset
+   * @param xLength
+   * @param yLength
+   */
+  void populate(ImageMetadata meta, T data, int xOffset, int yOffset, 
+      int xLength, int yLength);
 }
