@@ -40,13 +40,15 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Random;
 
+import net.imglib2.display.ColorTable;
+import net.imglib2.display.ColorTable16;
+import net.imglib2.display.ColorTable8;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
 import ome.scifio.AbstractChecker;
 import ome.scifio.AbstractFormat;
 import ome.scifio.AbstractMetadata;
 import ome.scifio.AbstractParser;
-import ome.scifio.AbstractReader;
 import ome.scifio.AbstractTranslator;
 import ome.scifio.AbstractWriter;
 import ome.scifio.ByteArrayPlane;
@@ -110,10 +112,6 @@ AbstractFormat<FakeFormat.Metadata, FakeFormat.Checker,
   public static final String DEFAULT_DIMENSION_ORDER = "XYZCT";
   
   private static final long SEED = 0xcafebabe;
-  private static final String LUT8 = "lut8";
-  private static final String LUT16 = "lut16";
-  private static final String INDEX_VALUE_MAP = "indexToValue";
-  private static final String VALUE_INDEX_MAP = "valueToIndex";
   
   public static final Logger LOGGER = null;
   
@@ -162,6 +160,12 @@ AbstractFormat<FakeFormat.Metadata, FakeFormat.Checker,
    */
   public static class Metadata extends AbstractMetadata {
     
+    // -- Fields --
+    
+    private ColorTable[] lut;
+    
+    private int[][] valueToIndex;
+    
     // -- Constructor --
     
     public Metadata() {
@@ -170,6 +174,24 @@ AbstractFormat<FakeFormat.Metadata, FakeFormat.Checker,
     
     public Metadata(SCIFIO ctx) {
       super(ctx);
+    }
+    
+    // -- FakeFormat.Metadata methods --
+
+    public ColorTable[] getLut() {
+      return lut;
+    }
+
+    public void setLut(ColorTable[] lut) {
+      this.lut = lut;
+    }
+
+    public int[][] getValueToIndex() {
+      return valueToIndex;
+    }
+
+    public void setValueToIndex(int[][] valueToIndex) {
+      this.valueToIndex = valueToIndex;
     }
   }
   
@@ -226,7 +248,8 @@ AbstractFormat<FakeFormat.Metadata, FakeFormat.Checker,
       int rgb = DEFAULT_RGB_CHANNEL_COUNT;
       boolean indexed = false;
       boolean falseColor = false;
-
+      int pixelType = FormatTools.pixelTypeFromString(DEFAULT_PIXEL_TYPE);
+      
       int imageCount = 1;
       int lutLength = DEFAULT_LUT_LENGTH;
       
@@ -243,6 +266,8 @@ AbstractFormat<FakeFormat.Metadata, FakeFormat.Checker,
       rgb = FakeUtils.getIntValue(fakeMap.get(RGB), rgb);
       indexed = FakeUtils.getBoolValue(fakeMap.get(INDEXED), indexed);
       falseColor = FakeUtils.getBoolValue(fakeMap.get(FALSE_COLOR), falseColor);
+      String mappedPType = fakeMap.get(PIXEL_TYPE);
+      pixelType = FormatTools.pixelTypeFromString(mappedPType == null ? DEFAULT_PIXEL_TYPE : mappedPType);
 
       imageCount = FakeUtils.getIntValue(fakeMap.get(SERIES), imageCount);
       lutLength = FakeUtils.getIntValue(fakeMap.get(LUT_LENGTH), lutLength);
@@ -272,6 +297,63 @@ AbstractFormat<FakeFormat.Metadata, FakeFormat.Checker,
       if (lutLength < 1) {
         throw new FormatException("Invalid lutLength: " + lutLength);
       }
+      
+      
+      // for indexed color images, create lookup tables
+      if (indexed) {
+        int[][] indexToValue = null;
+        int[][] valueToIndex = null;
+        ColorTable[] luts = null;
+        
+        if (pixelType == FormatTools.UINT8) {
+          // create 8-bit LUTs
+          final int num = 256;
+          indexToValue = new int[sizeC][num];
+          valueToIndex = new int[sizeC][num];
+          FakeUtils.createIndexValueMap(indexToValue);
+          luts = new ColorTable8[sizeC];
+          // linear ramp
+          for (int c=0; c<sizeC; c++) {
+            byte[][] lutBytes = new byte[lutLength][num];
+            for (int i=0; i<lutLength; i++) {
+              for (int index=0; index<num; index++) {
+                lutBytes[i][index] = (byte) indexToValue[c][index];
+              }
+            }
+            luts[c] = new ColorTable8(lutBytes);
+          }
+        }
+        else if (pixelType == FormatTools.UINT16) {
+          // create 16-bit LUTs
+          final int num = 65536;
+          indexToValue = new int[sizeC][num];
+          valueToIndex = new int[sizeC][num];
+          FakeUtils.createIndexValueMap(indexToValue);
+          luts = new ColorTable16[sizeC];
+          // linear ramp
+          for (int c=0; c<sizeC; c++) {
+            short[][] lutShorts = new short[lutLength][num];
+            for (int i=0; i<lutLength; i++) {
+              for (int index=0; index<num; index++) {
+                lutShorts[i][index] = (short) indexToValue[c][index];
+              }
+            }
+            luts[c] = new ColorTable16(lutShorts);
+          }
+        }
+        
+        meta.setLut(luts);
+        
+        if(valueToIndex != null) {
+          FakeUtils.createInverseIndexMap(indexToValue, valueToIndex);
+          meta.setValueToIndex(valueToIndex);
+        }
+        // NB: Other pixel types will have null LUTs.
+      }
+      
+
+      
+      
       return meta;
     }
   }
@@ -307,6 +389,7 @@ AbstractFormat<FakeFormat.Metadata, FakeFormat.Checker,
           plane.getData().length, x, y, w, h);
 
       DatasetMetadata<?> dMeta = getDatasetMetadata();
+      plane.setImageMetadata(dMeta.get(imageIndex));
       
       final int pixelType = dMeta.getPixelType(imageIndex);
       final int bpp = FormatTools.getBytesPerPixel(pixelType);
@@ -317,9 +400,8 @@ AbstractFormat<FakeFormat.Metadata, FakeFormat.Checker,
       final boolean little = dMeta.isLittleEndian(imageIndex);
       final boolean interleaved = dMeta.isInterleaved(imageIndex);
       final int scaleFactor = ((Double)dMeta.getMetadataValue(SCALE_FACTOR)).intValue();
-      final byte[][][] lut8 = (byte[][][]) dMeta.getMetadataValue(LUT8);
-      final short[][][] lut16 = (short[][][]) dMeta.getMetadataValue(LUT16);
-      final int[][] valueToIndex = (int[][])dMeta.getMetadataValue(VALUE_INDEX_MAP);
+      final ColorTable[] lut = getMetadata().getLut();
+      final int[][] valueToIndex = getMetadata().getValueToIndex();
       
       final int[] zct = FormatTools.getZCTCoords(this, imageIndex, planeIndex);
       final int zIndex = zct[0], cIndex = zct[1], tIndex = zct[2];
@@ -365,8 +447,9 @@ AbstractFormat<FakeFormat.Metadata, FakeFormat.Checker,
             }
 
             // if indexed color with non-null LUT, convert value to index
-            if (indexed) {
-              int modValue = lut8 != null ? 256 : (lut16 != null ? 65536 : 0);
+            if (indexed && lut != null) {
+              int modValue = lut[ac].getLength();
+              plane.setColorTable(lut[ac]);
               
               if (valueToIndex != null) pixel = valueToIndex[ac][(int) (pixel % modValue)];
             }
@@ -531,57 +614,7 @@ AbstractFormat<FakeFormat.Metadata, FakeFormat.Checker,
         else
           axisLengths[i] = -1; // Unknown axis
       }
-      
-      // for indexed color images, create lookup tables
-      if (indexed) {
-        int[][] indexToValue = null;
-        int[][] valueToIndex = null;
-        
-        if (pixelType == FormatTools.UINT8) {
-          byte[][][] lut8 = null;
-          // create 8-bit LUTs
-          final int num = 256;
-          indexToValue = new int[sizeC][num];
-          valueToIndex = new int[sizeC][num];
-          FakeUtils.createIndexValueMap(indexToValue);
-          lut8 = new byte[sizeC][lutLength][num];
-          // linear ramp
-          for (int c=0; c<sizeC; c++) {
-            for (int i=0; i<lutLength; i++) {
-              for (int index=0; index<num; index++) {
-                lut8[c][i][index] = (byte) indexToValue[c][index];
-              }
-            }
-          }
-          destination.putDatasetMeta(LUT8, lut8);
-        }
-        else if (pixelType == FormatTools.UINT16) {
-          short[][][] lut16 = null;
-          // create 16-bit LUTs
-          final int num = 65536;
-          indexToValue = new int[sizeC][num];
-          valueToIndex = new int[sizeC][num];
-          FakeUtils.createIndexValueMap(indexToValue);
-          lut16 = new short[sizeC][lutLength][num];
-          // linear ramp
-          for (int c=0; c<sizeC; c++) {
-            for (int i=0; i<lutLength; i++) {
-              for (int index=0; index<num; index++) {
-                lut16[c][i][index] = (short) indexToValue[c][index];
-              }
-            }
-          }
-          destination.putDatasetMeta(LUT16, lut16);
-        }
-        
-        if(indexToValue != null) {
-          FakeUtils.createInverseIndexMap(indexToValue, valueToIndex);
-          destination.putDatasetMeta(INDEX_VALUE_MAP, indexToValue);
-          destination.putDatasetMeta(VALUE_INDEX_MAP, valueToIndex);
-        }
-        // NB: Other pixel types will have null LUTs.
-      }
-      
+
       destination.putDatasetMeta(SCALE_FACTOR, scaleFactor);
       destination.putDatasetMeta(LUT_LENGTH, lutLength);
       
