@@ -170,10 +170,6 @@ public abstract class AbstractReader<M extends Metadata, P extends Plane>
       dMeta.getAxisLength(imageIndex, Axes.Y));
   }
 
-  /* @see Reader#openBytes(int, int, byte[], int, int, int, int) */
-  public abstract P openPlane(int imageIndex, int planeIndex, P plane,
-    int x, int y, int w, int h) throws FormatException, IOException;
-
   /* @see Reader#readPlane(RandomAccessInputStream, int, int, int, int, int, int, byte[] */
   public P readPlane(final RandomAccessInputStream s,
     final int imageIndex, final int x, final int y, final int w, final int h,

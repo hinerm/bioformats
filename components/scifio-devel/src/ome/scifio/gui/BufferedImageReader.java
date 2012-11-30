@@ -37,17 +37,11 @@
 package ome.scifio.gui;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 
-import net.imglib2.display.ColorTable16;
-import net.imglib2.display.ColorTable8;
 import ome.scifio.AbstractReader;
 import ome.scifio.BufferedImagePlane;
-import ome.scifio.FormatException;
 import ome.scifio.Metadata;
 import ome.scifio.SCIFIO;
-import ome.scifio.common.DataTools;
-import ome.scifio.util.FormatTools;
 
 /**
  * BufferedImageReader is the superclass for file format readers
@@ -67,44 +61,16 @@ public abstract class BufferedImageReader<M extends Metadata>
   public BufferedImageReader(final SCIFIO ctx) {
     super(ctx);
   }
-
-  // -- Reader API methods --
-
-  /**
-   * @see ome.scifio.Reader#openPlane(int, byte[], int, int, int, int)
-   */
-  @Override
-  public BufferedImagePlane openPlane(final int imageIndex, 
-    final int planeIndex, final BufferedImagePlane plane, final int x,
-    final int y, final int w, final int h) throws FormatException, IOException
-  {
-    FormatTools.checkPlaneParameters(
-      this, imageIndex, planeIndex, plane.getSize(), x, y, w, h);
-
-    final BufferedImagePlane tempPlane =
-      openPlane(imageIndex, planeIndex, x, y, w, h);
-    if(tempPlane.getColorTable() instanceof ColorTable8) {
-        final byte[] t = AWTImageTools.getBytes(tempPlane.getData(), false);
-        System.arraycopy(t, 0, plane, 0, Math.min(t.length, plane.getSize()));
-        break;
-    }
-    else if(tempPlane.getColorTable() instanceof ColorTable16) {
-        final short[][] ts = AWTImageTools.getShorts(tempPlane.getData());
-        for (int c = 0; c < ts.length; c++) {
-          int offset = c * ts[c].length * 2;
-          for (int i = 0; i < ts[c].length && offset < plane.length; i++) {
-            DataTools.unpackBytes(
-              ts[c][i], plane.getBytes(), offset, 2, dMeta.isLittleEndian(planeIndex));
-            offset += 2;
-          }
-        }
-        break;
-    }
-    return plane;
-  }
   
-  public BufferedImagePlane createPlane() {
-    return new BufferedImagePlane(getContext());
+  // -- Reader API Methods --
+  
+  /*
+   * @see ome.scifio.Reader#createPlane(int, int, int, int)
+   */
+  public BufferedImagePlane createPlane(int xOffset, int yOffset, int xLength,
+      int yLength) {
+    return new BufferedImagePlane(getContext(), getDatasetMetadata().get(0),
+        xOffset, yOffset, xLength, yLength);
   }
 
   // -- BufferedImageReader methods --
