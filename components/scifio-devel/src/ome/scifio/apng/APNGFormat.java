@@ -50,6 +50,8 @@ import java.util.zip.DeflaterOutputStream;
 
 import javax.imageio.ImageIO;
 
+import net.imglib2.display.ColorTable;
+import net.imglib2.display.ColorTable8;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
 import ome.scifio.AbstractChecker;
@@ -406,7 +408,7 @@ public class APNGFormat
     // -- Fields --
   
     // Cached copy of the last plane that was returned.
-    private BufferedImage lastPlane;
+    private BufferedImagePlane lastPlane;
   
     // Plane index of the last plane that was returned.
     private int lastPlaneIndex = -1;
@@ -426,8 +428,8 @@ public class APNGFormat
     // -- Reader API Methods --
   
     /* @see ome.scifio.Reader#openPlane(int, int, int, int, int) */
-    @Override
-    public BufferedImagePlane readPlane(final int imageIndex, final int planeIndex, final int x, final int y, final int w,
+    public BufferedImagePlane openPlane(final int imageIndex, final int planeIndex,
+      final BufferedImagePlane plane, final int x, final int y, final int w,
       final int h) throws FormatException, IOException
     {
       FormatTools.checkPlaneParameters(
@@ -435,24 +437,42 @@ public class APNGFormat
   
       // If the last processed (cached) plane is requested, return it
       if (planeIndex == lastPlaneIndex && lastPlane != null) {
-        return AWTImageTools.getSubimage(
-          lastPlane, dMeta.isLittleEndian(planeIndex), x, y, w, h);
+        return lastPlane;
+      }
+      else if (lastPlane == null) {
+        lastPlane = new BufferedImagePlane(getContext(), 
+            getDatasetMetadata().get(imageIndex), x, y, w, h);
+        
+        if (getDatasetMetadata().isIndexed(imageIndex)) {
+          APNGPLTEChunk plte = getMetadata().getPlte();
+          ColorTable ct = new ColorTable8(plte.getRed(), plte.getGreen(),
+              plte.getBlue());
+          lastPlane.setColorTable(ct);
+        }
       }
   
-      // The default frame is requested and we can use the standard Java ImageIO to extract it
+      // The default frame is requested and we can use the standard 
+      // Java ImageIO to extract it
       if (planeIndex == 0) {
         in.seek(0);
         final DataInputStream dis =
           new DataInputStream(new BufferedInputStream(in, 4096));
-        lastPlane = ImageIO.read(dis);
+        BufferedImage subImg = ImageIO.read(dis);
+        lastPlane.populate(getDatasetMetadata().get(imageIndex), subImg,
+            x, y, w, h);
+        
         lastPlaneIndex = 0;
-        if (x == 0 && y == 0 && w == dMeta.getAxisLength(imageIndex, Axes.X) &&
-          h == dMeta.getAxisLength(imageIndex, Axes.Y))
+        
+        if (x != 0 || y != 0 || w != dMeta.getAxisLength(imageIndex, Axes.X) ||
+          h != dMeta.getAxisLength(imageIndex, Axes.Y))
         {
-          return lastPlane;
+          // updates the data of lastPlane to a sub-image, by reference
+          subImg = AWTImageTools.getSubimage(
+              lastPlane.getData(), dMeta.isLittleEndian(planeIndex),
+              x, y, w, h);
         }
-        return AWTImageTools.getSubimage(
-          lastPlane, dMeta.isLittleEndian(imageIndex), x, y, w, h);
+
+        return lastPlane;
       }
   
       // For a non-default frame, the appropriate chunks will be used to create a new image,
@@ -502,20 +522,24 @@ public class APNGFormat
       dis.close();
   
       // Recover first plane
-  
-      lastPlane = null;
+
       openPlane(
         imageIndex, 0, 0, 0, dMeta.getAxisLength(imageIndex, Axes.X),
         dMeta.getAxisLength(imageIndex, Axes.Y));
   
       // paste current image onto first plane
+      // NB: last plane read was the first plane
   
-      final WritableRaster firstRaster = lastPlane.getRaster();
+      final WritableRaster firstRaster = lastPlane.getData().getRaster();
       final WritableRaster currentRaster = bi.getRaster();
   
       firstRaster.setDataElements(coords[0], coords[1], currentRaster);
-      lastPlane =
-        new BufferedImage(lastPlane.getColorModel(), firstRaster, false, null);
+      BufferedImage bImg =
+        new BufferedImage(lastPlane.getData().getColorModel(), firstRaster, false, null);
+      
+      lastPlane.populate(getDatasetMetadata().get(imageIndex), bImg,
+          x, y, w, h);
+      
       lastPlaneIndex = planeIndex;
       return lastPlane;
     }
@@ -927,6 +951,12 @@ public class APNGFormat
   
       if (indexed) {
         ihdr.setColourType((byte) 0x2);
+        
+        /*
+         * NB: not necessary to preserve ColorTable when translating. If
+         * an image has a color table it will be parsed and included in
+         * whatever plane is returned by an openPlane call. So it doesn't
+         * also need to be preserved in the Metadata.
         byte[][] lut = null;
         try {
           lut = source.get8BitLookupTable(0);
@@ -940,7 +970,7 @@ public class APNGFormat
         catch (final IOException e) {
           LOGGER.error("IO error when finding 8bit lookup table", e);
         }
-  
+        */
       }
       else if (sizec == 2) {
         ihdr.setColourType((byte) 0x4);
@@ -1032,6 +1062,8 @@ public class APNGFormat
           break;
       }
   
+      /*
+       * TODO: destination metadata doesn't care about the LUT
       if (indexed) {
         final byte[][] lut = new byte[3][0];
   
@@ -1041,7 +1073,8 @@ public class APNGFormat
   
         imageMeta.setLut(lut);
       }
-  
+      */
+      
       final APNGacTLChunk actl = source.getActl();
       final int planeCount = actl == null ? 1 : actl.getNumFrames();
   
@@ -1061,7 +1094,7 @@ public class APNGFormat
       catch (final FormatException e) {
         LOGGER.error("Failed to find pixel type from bytes: " + (bpp/8), e);
       }
-      imageMeta.setRgb(rgb);
+      imageMeta.setRGB(rgb);
       imageMeta.setIndexed(indexed);
       imageMeta.setPlaneCount(planeCount);
       imageMeta.setLittleEndian(false);
