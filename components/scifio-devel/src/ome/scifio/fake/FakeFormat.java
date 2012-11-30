@@ -49,6 +49,8 @@ import ome.scifio.AbstractParser;
 import ome.scifio.AbstractReader;
 import ome.scifio.AbstractTranslator;
 import ome.scifio.AbstractWriter;
+import ome.scifio.ByteArrayPlane;
+import ome.scifio.ByteArrayReader;
 import ome.scifio.DefaultDatasetMetadata;
 import ome.scifio.DefaultImageMetadata;
 import ome.scifio.DatasetMetadata;
@@ -279,7 +281,7 @@ AbstractFormat<FakeFormat.Metadata, FakeFormat.Checker,
    * based on the specified dimensions and qualities of the "image."
    *
    */
-  public static class Reader extends AbstractReader<Metadata> {
+  public static class Reader extends ByteArrayReader<Metadata> {
     
     // -- Fields --
     
@@ -298,10 +300,11 @@ AbstractFormat<FakeFormat.Metadata, FakeFormat.Checker,
     
     // -- Reader API methods --
 
-    @Override
-    public byte[] openBytes(int imageIndex, int planeIndex, byte[] buf, int x,
-        int y, int w, int h) throws FormatException, IOException {
-      FormatTools.checkPlaneParameters(this, imageIndex, planeIndex, buf.length, x, y, w, h);
+    public ByteArrayPlane openPlane(int imageIndex, int planeIndex, 
+        ByteArrayPlane plane, int x, int y, int w, int h) 
+        throws FormatException, IOException {
+      FormatTools.checkPlaneParameters(this, imageIndex, planeIndex,
+          plane.getData().length, x, y, w, h);
 
       DatasetMetadata<?> dMeta = getDatasetMetadata();
       
@@ -313,10 +316,10 @@ AbstractFormat<FakeFormat.Metadata, FakeFormat.Checker,
       final boolean indexed = dMeta.isIndexed(imageIndex);
       final boolean little = dMeta.isLittleEndian(imageIndex);
       final boolean interleaved = dMeta.isInterleaved(imageIndex);
-      final int scaleFactor = ((Double)dMeta.getMetadataValue(imageIndex, SCALE_FACTOR)).intValue();
-      final byte[][][] lut8 = (byte[][][]) dMeta.getMetadataValue(imageIndex, LUT8);
-      final short[][][] lut16 = (short[][][]) dMeta.getMetadataValue(imageIndex, LUT16);
-      final int[][] valueToIndex = (int[][])dMeta.getMetadataValue(imageIndex, VALUE_INDEX_MAP);
+      final int scaleFactor = ((Double)dMeta.getMetadataValue(SCALE_FACTOR)).intValue();
+      final byte[][][] lut8 = (byte[][][]) dMeta.getMetadataValue(LUT8);
+      final short[][][] lut16 = (short[][][]) dMeta.getMetadataValue(LUT16);
+      final int[][] valueToIndex = (int[][])dMeta.getMetadataValue(VALUE_INDEX_MAP);
       
       final int[] zct = FormatTools.getZCTCoords(this, imageIndex, planeIndex);
       final int zIndex = zct[0], cIndex = zct[1], tIndex = zct[2];
@@ -392,12 +395,12 @@ AbstractFormat<FakeFormat.Metadata, FakeFormat.Checker,
             if (interleaved) index = w * rgb * row + rgb * col + cOffset; // CXY
             else index = h * w * cOffset + w * row + col; // XYC
             index *= bpp;
-            DataTools.unpackBytes(pixel, buf, index, bpp, little);
+            DataTools.unpackBytes(pixel, plane.getData(), index, bpp, little);
           }
         }
       }
 
-      return buf;
+      return plane;
     }
   }
   
@@ -598,7 +601,7 @@ AbstractFormat<FakeFormat.Metadata, FakeFormat.Checker,
         imageMeta.setThumbSizeY(thumbSizeY);
         imageMeta.setIndexed(indexed);
         imageMeta.setFalseColor(falseColor);
-        imageMeta.setRgb(rgb > 1);
+        imageMeta.setRGB(rgb > 1);
         imageMeta.setLittleEndian(little);
         imageMeta.setInterleaved(interleaved);
         imageMeta.setMetadataComplete(metadataComplete);
@@ -660,13 +663,13 @@ AbstractFormat<FakeFormat.Metadata, FakeFormat.Checker,
       fakeId = FakeUtils.appendToken(fakeId, SERIES, Integer.toString(source.getImageCount()));
       fakeId = FakeUtils.appendToken(fakeId, RGB, Integer.toString(source.getRGBChannelCount(0)));
       
-      if(source.getMetadataValue(0, SCALE_FACTOR) != null) {
-        double scaleFactor = (Double)source.getMetadataValue(0, SCALE_FACTOR);
+      if(source.getMetadataValue(SCALE_FACTOR) != null) {
+        double scaleFactor = (Double)source.getMetadataValue(SCALE_FACTOR);
         fakeId = FakeUtils.appendToken(fakeId, SCALE_FACTOR, Double.toString(scaleFactor));
       }
       
-      if(source.getMetadataValue(0, LUT_LENGTH) != null) {
-        int lutLength = (Integer)source.getMetadataValue(0, LUT_LENGTH);
+      if(source.getMetadataValue(LUT_LENGTH) != null) {
+        int lutLength = (Integer)source.getMetadataValue(LUT_LENGTH);
         fakeId = FakeUtils.appendToken(fakeId, LUT_LENGTH, Integer.toString(lutLength));
       }
       
