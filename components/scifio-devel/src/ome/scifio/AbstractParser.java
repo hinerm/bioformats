@@ -54,8 +54,8 @@ import org.slf4j.LoggerFactory;
  * Abstract superclass of all SCIFIO Parser components.
  *
  */
-public abstract class AbstractParser<M extends Metadata>
-  extends AbstractHasContext implements Parser<M> {
+public abstract class AbstractParser<M extends TypedMetadata>
+  extends AbstractHasContext implements TypedParser<M> {
 
   // -- Constants --
 
@@ -93,8 +93,7 @@ public abstract class AbstractParser<M extends Metadata>
 
   // -- HasFormat API Methods --
 
-  @SuppressWarnings("unchecked")
-  public Format<M, ?, ?, ?, ?> getFormat() {
+  public Format getFormat() {
     return getContext().getFormatFromParser(getClass());
   }
 
@@ -114,7 +113,8 @@ public abstract class AbstractParser<M extends Metadata>
   public M parse(final RandomAccessInputStream stream)
     throws IOException, FormatException
   {
-    M meta = getFormat().createMetadata();
+    @SuppressWarnings("unchecked")
+    M meta = (M) getFormat().createMetadata();
     return parse(stream, meta);
   }
 
@@ -151,6 +151,27 @@ public abstract class AbstractParser<M extends Metadata>
     if(metadata.getContext() == null) metadata.setContext(getContext());
     metadata.setSource(stream);
     return metadata;
+  }
+  
+  /* @see Parser#parse(File, M) */
+  public M parse(final File file, final Metadata meta)
+    throws IOException, FormatException
+  {
+    return parse(file, getFormat().<M>convert(meta));
+  }
+
+  /* @see Parser#parse(String, M) */
+  public M parse(final String fileName, final Metadata meta)
+    throws IOException, FormatException
+  {
+    return parse(fileName, getFormat().<M>convert(meta));
+  }
+
+  /* @see Parser#parse(RandomAccessInputStream, M) */
+  public M parse(final RandomAccessInputStream stream, final Metadata meta)
+    throws IOException, FormatException
+  {
+    return parse(stream, getFormat().<M>convert(meta));
   }
 
   /* @see Parser#close(boolean) */

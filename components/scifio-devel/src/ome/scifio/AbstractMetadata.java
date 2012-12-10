@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 import ome.scifio.io.RandomAccessInputStream;
 
 public abstract class AbstractMetadata extends AbstractHasContext
-  implements Metadata {
+  implements TypedMetadata {
 
   // -- Constants --
 
@@ -60,7 +60,7 @@ public abstract class AbstractMetadata extends AbstractHasContext
 
   // -- HasFormat API Methods --
 
-  public Format<?, ?, ?, ?, ?> getFormat() {
+  public Format getFormat() {
     return getContext().getFormatFromMetadata(getClass());
   }
 

@@ -35,57 +35,54 @@
  */
 package ome.scifio;
 
-import java.util.List;
-
 /**
- * Interface for all SciFIO formats.
+ * TODO
+ * @author Mark Hiner
  *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="">Trac</a>,
- * <a href="">Gitweb</a></dd></dl>
+ * @param <M>
+ * @param <C>
+ * @param <P>
+ * @param <R>
+ * @param <W>
  */
-public interface Format
-  extends HasContext, Comparable<Format> {
-
-  // -- Format API methods --
-
-  /** Returns the priority of this format.  Used for comparison to other formats. */
-  Double getPriority();
+public interface TypedFormat<M extends TypedMetadata, C extends Checker,
+P extends TypedParser<M>, R extends TypedReader<M, DataPlane<?>>,
+W extends TypedWriter<M>> extends Format {
 
   /**
    * Create the Metadata object associated with this format.
    * @return
    * @throws FormatException
    */
-  Metadata createMetadata() throws FormatException;
+  M createMetadata() throws FormatException;
 
   /**
    * Create the Checker object associated with this format.
    * @return
    * @throws FormatException
    */
-  Checker createChecker() throws FormatException;
+  C createChecker() throws FormatException;
 
   /**
    * Create the Parser object associated with this format.
    * @return
    * @throws FormatException
    */
-  Parser createParser() throws FormatException;
+  P createParser() throws FormatException;
 
   /**
    * Creates the Reader object associated with this format.
    * @return
    * @throws FormatException
    */
-  Reader createReader() throws FormatException;
+  R createReader() throws FormatException;
 
   /**
    * Creates the Writer object associated with this format.
    * @return
    * @throws FormatException
    */
-  Writer createWriter() throws FormatException;
+  W createWriter() throws FormatException;
 
   /**
    * Returns a translator capable of translating from this format's Metadata
@@ -95,7 +92,7 @@ public interface Format
    * @param targetMeta
    * @return
    */
-  Translator findSourceTranslator(Metadata targetMeta)
+  <N extends TypedMetadata> TypedTranslator<M, N> findSourceTranslator(N targetMeta)
     throws FormatException;
 
   /**
@@ -106,47 +103,36 @@ public interface Format
    * @param targetMeta
    * @return
    */
-  Translator findDestTranslator(Metadata targetMeta)
+  <N extends TypedMetadata> TypedTranslator<N, M> findDestTranslator(N targetMeta)
     throws FormatException;
-  
-  List<Class<? extends Translator>> getTranslatorClassList();
-  
-  /** Gets the name of this file format. */
-  String getFormatName();
-
-  /** Gets the default file suffixes for this file format. */
-  String[] getSuffixes();
   
   /**
    * Returns the class of the Metadata associated with this format
    * @return
    */
-  Class<? extends Metadata> getMetadataClass();
+  Class<M> getMetadataClass();
 
   /**
    * Returns the class of the Checker associated with this format
    * @return
    */
-  Class<? extends Checker> getCheckerClass();
+  Class<C> getCheckerClass();
 
   /**
    * Returns the class of the Parser associated with this format
    * @return
    */
-  Class<? extends Parser> getParserClass();
+  Class<P> getParserClass();
 
   /**
    * Returns the class of the Reader associated with this format
    * @return
    */
-  Class<? extends Reader> getReaderClass();
+  Class<R> getReaderClass();
 
   /**
    * Returns the class of the Writer associated with this format
    * @return
    */
-  Class<? extends Writer> getWriterClass();
-  
-  <M extends Metadata> M convert(Metadata meta);
-
+  Class<W> getWriterClass();
 }

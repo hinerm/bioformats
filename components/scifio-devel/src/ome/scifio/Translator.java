@@ -33,7 +33,6 @@
  * policies, either expressed or implied, of any organization.
  * #L%
  */
-
 package ome.scifio;
 
 /**
@@ -44,7 +43,7 @@ package ome.scifio;
  * <dd><a href="">Trac</a>,
  * <a href="">Gitweb</a></dd></dl>
  */
-public interface Translator<M extends Metadata, N extends Metadata>
+public interface Translator
   extends HasContext, HasFormat {
 
   // -- Translator API methods --
@@ -56,7 +55,6 @@ public interface Translator<M extends Metadata, N extends Metadata>
    * ensured by calling the reset() method ahead of time.
    * 
    * @param metaIn Metadata object of the Input type
-   * @return a new Metadtata object
    */
-  void translate(final M source, final N destination);
+  void translate(final Metadata source, final Metadata destination);
 }

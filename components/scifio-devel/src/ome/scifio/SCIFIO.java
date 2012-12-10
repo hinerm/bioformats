@@ -61,57 +61,55 @@ public class SCIFIO {
 
   private final SCIFIOComponentFinder scf = new SCIFIOComponentFinder();
 
-  private final Discoverer<SCIFIOFormat, Format<? extends Metadata, ? extends Checker<? extends Metadata>, 
-      ? extends Parser<? extends Metadata>, ? extends Reader<? extends Metadata, ? extends Plane>, 
-      ? extends Writer<? extends Metadata>>> discoverer = new FormatDiscoverer();
+  private final Discoverer<SCIFIOFormat, Format> discoverer = new FormatDiscoverer();
 
   /**
    * List of all formats known to this context.
    * 
    */
-  private final List<Format<?, ?, ?, ?, ?>> formats = new ArrayList<Format<?, ?, ?, ?, ?>>();
+  private final List<Format> formats = new ArrayList<Format>();
 
   /**
    * Maps Checker classes to their containing format.
    * 
    */
-  private final Map<Class<? extends Checker<? extends Metadata>>, Format<?, ?, ?, ?, ?>> checkerMap =
-      new HashMap<Class<? extends Checker<? extends Metadata>>, Format<?, ?, ?, ?, ?>>();
+  private final Map<Class<? extends Checker>, Format> checkerMap =
+      new HashMap<Class<? extends Checker>, Format>();
 
   /**
    * Maps Parser classes to their containing format.
    * 
    */
-  private final Map<Class<? extends Parser<? extends Metadata>>, Format<?, ?, ?, ?, ?>> parserMap = 
-      new HashMap<Class<? extends Parser<? extends Metadata>>, Format<?, ?, ?, ?, ?>>();
+  private final Map<Class<? extends Parser>, Format> parserMap = 
+      new HashMap<Class<? extends Parser>, Format>();
 
   /**
    * Maps Reader classes to their containing format.
    * 
    */
-  private final Map<Class<? extends Reader<? extends Metadata, ? extends Plane>>, Format<?, ?, ?, ?, ?>> readerMap =
-      new HashMap<Class<? extends Reader<? extends Metadata, ? extends Plane>>, Format<?, ?, ?, ?, ?>>();
+  private final Map<Class<? extends Reader>, Format> readerMap =
+      new HashMap<Class<? extends Reader>, Format>();
 
   /**
    * Maps Writer classes to their containing formats.
    * 
    */
-  private final Map<Class<? extends Writer<? extends Metadata>>, Format<?, ?, ?, ?, ?>> writerMap =
-      new HashMap<Class<? extends Writer<? extends Metadata>>, Format<?, ?, ?, ?, ?>>();
+  private final Map<Class<? extends Writer>, Format> writerMap =
+      new HashMap<Class<? extends Writer>, Format>();
 
   /**
    * 
    * Maps Translator classes to their containing formats.
    * 
    */
-  private final Map<Class<? extends Translator<? extends Metadata, ? extends Metadata>>, Format<?, ?, ?, ?, ?>> translatorMap =
-      new HashMap<Class<? extends Translator<? extends Metadata, ? extends Metadata>>, Format<?, ?, ?, ?, ?>>();
+  private final Map<Class<? extends Translator>, Format> translatorMap =
+      new HashMap<Class<? extends Translator>, Format>();
 
   /**
    * Maps Metadata classes to their containing formats.
    * 
    */
-  private final Map<Class<Metadata>, Format<?, ?, ?, ?, ?>> metadataMap = new HashMap<Class<Metadata>, Format<?, ?, ?, ?, ?>>();
+  private final Map<Class<? extends Metadata>, Format> metadataMap = new HashMap<Class<? extends Metadata>, Format>();
 
   // -- Constructors --
 
@@ -120,7 +118,7 @@ public class SCIFIO {
    * 
    */
   public SCIFIO() throws FormatException {
-    this((Format<?, ?, ?, ?, ?>[]) null);
+    this((Format[]) null);
   }
 
   /**
@@ -131,7 +129,7 @@ public class SCIFIO {
    * @param formats
    * @throws FormatException
    */
-  public SCIFIO(final Format<?, ?, ?, ?, ?>... formats)
+  public SCIFIO(final Format... formats)
       throws FormatException {
     processFormats(formats);
   }
@@ -150,14 +148,14 @@ public class SCIFIO {
    */
   @SuppressWarnings("unchecked")
   public <M extends Metadata> void addFormat(
-      final Format<M, ?, ?, ?, ?> format) throws FormatException {
+      final Format format) throws FormatException {
     formats.add(format);
     checkerMap.put(format.getCheckerClass(), format);
     parserMap.put(format.getParserClass(), format);
     readerMap.put(format.getReaderClass(), format);
     writerMap.put(format.getWriterClass(), format);
     metadataMap.put((Class<Metadata>) format.getMetadataClass(), format);
-    for (final Class<Translator<?, ?>> translatorClass : format
+    for (final Class<? extends Translator> translatorClass : format
         .getTranslatorClassList()) {
       translatorMap.put(translatorClass, format);
     }
@@ -170,15 +168,15 @@ public class SCIFIO {
    * @param format
    * @return
    */
-  public boolean removeFormat(final Format<?, ?, ?, ?, ?> format) {
+  public boolean removeFormat(final Format format) {
     checkerMap.remove(format.getCheckerClass());
     parserMap.remove(format.getParserClass());
     readerMap.remove(format.getReaderClass());
     writerMap.remove(format.getWriterClass());
     metadataMap.remove(format.getMetadataClass());
-    for (final Class<? extends Translator<? extends Metadata, ? extends Metadata>> translatorClass : format
+    for (final Class<? extends Translator> translatorClass : format
         .getTranslatorClassList()) {
-      translatorMap.put(translatorClass, format);
+      translatorMap.remove(translatorClass);
     }
     return formats.remove(format);
   }
@@ -187,11 +185,9 @@ public class SCIFIO {
    * Lookup method for the Reader map
    * 
    */
-  public <M extends Metadata, R extends Reader<M, ? extends Plane>> Format<M, ?, ?, R, ?> getFormatFromReader(
+  public <R extends Reader> Format getFormatFromReader(
       final Class<R> readerClass) {
-    @SuppressWarnings("unchecked")
-    final Format<M, ?, ?, R, ?> format = (Format<M, ?, ?, R, ?>) readerMap
-        .get(readerClass);
+    final Format format =  readerMap.get(readerClass);
     return format;
   }
 
@@ -199,11 +195,9 @@ public class SCIFIO {
    * Lookup method for the Writer map
    * 
    */
-  public <M extends Metadata, W extends Writer<M>> Format<M, ?, ?, ?, W> getFormatFromWriter(
+  public <W extends Writer> Format getFormatFromWriter(
       final Class<W> writerClass) {
-    @SuppressWarnings("unchecked")
-    final Format<M, ?, ?, ?, W> format = (Format<M, ?, ?, ?, W>) writerMap
-        .get(writerClass);
+    final Format format = writerMap.get(writerClass);
     return format;
   }
 
@@ -211,11 +205,9 @@ public class SCIFIO {
    * Lookup method for the Checker map
    * 
    */
-  public <M extends Metadata, C extends Checker<M>> Format<M, C, ?, ?, ?> getFormatFromChecker(
+  public <C extends Checker> Format getFormatFromChecker(
       final Class<C> checkerClass) {
-    @SuppressWarnings("unchecked")
-    final Format<M, C, ?, ?, ?> format = (Format<M, C, ?, ?, ?>) checkerMap
-        .get(checkerClass);
+    final Format format = checkerMap.get(checkerClass);
     return format;
   }
 
@@ -223,11 +215,9 @@ public class SCIFIO {
    * Lookup method for the Parser map
    * 
    */
-  public <M extends Metadata, P extends Parser<M>> Format<M, ?, P, ?, ?> getFormatFromParser(
+  public <P extends Parser> Format getFormatFromParser(
       final Class<P> parserClass) {
-    @SuppressWarnings("unchecked")
-    final Format<M, ?, P, ?, ?> format = (Format<M, ?, P, ?, ?>) parserMap
-        .get(parserClass);
+    final Format format = parserMap.get(parserClass);
     return format;
   }
 
@@ -235,11 +225,9 @@ public class SCIFIO {
    * Lookup method for the Translator map
    * 
    */
-  public <M extends Metadata, T extends Translator<M, ?>> Format<M, ?, ?, ?, ?> getFormatFromTranslator(
+  public <T extends Translator> Format getFormatFromTranslator(
       final Class<T> translatorClass) {
-    @SuppressWarnings("unchecked")
-    final Format<M, ?, ?, ?, ?> format = (Format<M, ?, ?, ?, ?>) translatorMap
-        .get(translatorClass);
+    final Format format = translatorMap.get(translatorClass);
     return format;
   }
 
@@ -247,11 +235,9 @@ public class SCIFIO {
    * Lookup method for the Metadata map
    * 
    */
-  public <M extends Metadata> Format<M, ?, ?, ?, ?> getFormatFromMetadata(
+  public <M extends Metadata> Format getFormatFromMetadata(
       final Class<M> metadataClass) {
-    @SuppressWarnings("unchecked")
-    final Format<M, ?, ?, ?, ?> format = (Format<M, ?, ?, ?, ?>) metadataMap
-        .get(metadataClass);
+    final Format format = metadataMap.get(metadataClass);
     return format;
   }
 
@@ -259,7 +245,7 @@ public class SCIFIO {
    * Returns the first Format known to be compatible with the source provided.
    * Formats are checked in ascending order of their priority.
    */
-  public Format<?, ?, ?, ?, ?> getFormat(final String id, final boolean open)
+  public Format getFormat(final String id, final boolean open)
       throws FormatException {
     return scf.findFormats(id, open, true, formats).get(0);
   }
@@ -273,7 +259,7 @@ public class SCIFIO {
    * @return
    * @throws FormatException
    */
-  public List<Format<?, ?, ?, ?, ?>> getFormatList(final String id,
+  public List<Format> getFormatList(final String id,
       final boolean openFile) throws FormatException {
     return scf.findFormats(id, openFile, false, formats);
   }
@@ -285,7 +271,7 @@ public class SCIFIO {
    * @return
    * @throws FormatException
    */
-  public Format<?, ?, ?, ?, ?> getFormat(final String id)
+  public Format getFormat(final String id)
       throws FormatException {
     return getFormat(id, false);
   }
@@ -297,7 +283,7 @@ public class SCIFIO {
    * @return
    * @throws FormatException
    */
-  public List<Format<?, ?, ?, ?, ?>> getFormatList(final String id)
+  public List<Format> getFormatList(final String id)
       throws FormatException {
     return getFormatList(id, false);
   }
@@ -310,7 +296,7 @@ public class SCIFIO {
    * @throws FormatException
    * @throws IOException
    */
-  public Reader<?, ? extends Plane> initializeReader(final String id) throws FormatException,
+  public Reader initializeReader(final String id) throws FormatException,
       IOException {
     return initializeReader(id, false);
   }
@@ -325,9 +311,9 @@ public class SCIFIO {
    * @throws FormatException
    * @throws IOException
    */
-  public Reader<?, ? extends Plane> initializeReader(final String id, final boolean openFile)
+  public Reader initializeReader(final String id, final boolean openFile)
       throws FormatException, IOException {
-    final Reader<?, ? extends Plane> r = getFormat(id, openFile).createReader();
+    final Reader r = getFormat(id, openFile).createReader();
     r.setSource(id);
     return r;
   }
@@ -343,7 +329,7 @@ public class SCIFIO {
    * @throws FormatException
    * @throws IOException
    */
-  public <M extends Metadata, N extends Metadata> Writer<M> initializeWriter(
+  public Writer initializeWriter(
       final String source, final String destination) throws FormatException, IOException {
     return initializeWriter(source, destination, false);
   }
@@ -361,18 +347,14 @@ public class SCIFIO {
    * @throws FormatException
    * @throws IOException
    */
-  public <M extends Metadata, N extends Metadata> Writer<M> initializeWriter(
+  public Writer initializeWriter(
       final String source, final String destination,
       final boolean openSource) throws FormatException, IOException {
-    @SuppressWarnings("unchecked")
-    final Format<N, ?, ?, ?, ?> sFormat = (Format<N, ?, ?, ?, ?>) getFormat(
-        source, openSource);
-    @SuppressWarnings("unchecked")
-    final Format<M, ?, ?, ?, ?> dFormat = (Format<M, ?, ?, ?, ?>) getFormat(
-        destination, false);
-    final Parser<N> parser = sFormat.createParser();
-    final N sourceMeta = parser.parse(source);
-    M destMeta = null;
+    final Format sFormat = getFormat(source, openSource);
+    final Format dFormat = getFormat(destination, false);
+    final Parser parser = sFormat.createParser();
+    final Metadata sourceMeta = parser.parse(source);
+    Metadata destMeta = null;
 
     // if dest is a different format than source, translate..
     if (sFormat != dFormat) {
@@ -380,11 +362,9 @@ public class SCIFIO {
       
       // TODO should probably make this general wrt DatasetMetadata,
       // but that also requires having a general way to instantiate DatasetMetadata
-      final Translator<N, DefaultDatasetMetadata> transToCore = sFormat
-          .findSourceTranslator(DefaultDatasetMetadata.class);
-      final Translator<DefaultDatasetMetadata, M> transFromCore = dFormat
-          .findDestTranslator(DefaultDatasetMetadata.class);
       final DefaultDatasetMetadata transMeta = new DefaultDatasetMetadata(this);
+      final Translator transToCore = sFormat.findSourceTranslator(transMeta);
+      final Translator transFromCore = dFormat.findDestTranslator(transMeta);
       transMeta.setSource(new RandomAccessInputStream(source));
       transToCore.translate(sourceMeta, transMeta);
       transFromCore.translate(transMeta, destMeta);
@@ -393,7 +373,7 @@ public class SCIFIO {
       destMeta = castMeta(sourceMeta, destMeta);
     }
 
-    final Writer<M> writer = dFormat.createWriter();
+    final Writer writer = dFormat.createWriter();
     writer.setMetadata(destMeta);
     writer.setDest(destination);
 
@@ -418,18 +398,14 @@ public class SCIFIO {
    * Processes each format in the provided list. If the list is null,
    * discovers available Formats
    */
-  private void processFormats(Format<?, ?, ?, ?, ?>... formats)
+  private void processFormats(Format... formats)
       throws FormatException {
     if (formats == null) {
-      List<Format<? extends Metadata, ? extends Checker<? extends Metadata>, 
-          ? extends Parser<? extends Metadata>, ? extends Reader<? extends Metadata, ? extends Plane>,
-          ? extends Writer<? extends Metadata>>> tmpFormats = discoverer.discover();
-      formats = tmpFormats.toArray(new Format<?, ?, ?, ?, ?>[tmpFormats.size()]);
+      List<Format> tmpFormats = discoverer.discover();
+      formats = tmpFormats.toArray(new Format[tmpFormats.size()]);
     }
 
-    for (final Format<? extends Metadata, ? extends Checker<? extends Metadata>, 
-        ? extends Parser<? extends Metadata>, ? extends Reader<? extends Metadata, ? extends Plane>, 
-        ? extends Writer<? extends Metadata>> format : formats) {
+    for (final Format format : formats) {
       format.setContext(this);
       addFormat(format);
     }

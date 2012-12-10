@@ -52,8 +52,8 @@ import ome.scifio.util.FormatTools;
  * Abstract superclass of all SCIFIO reader components.
  *
  */
-public abstract class AbstractReader<M extends Metadata, P extends Plane>
-  extends AbstractHasContext implements Reader<M, P> {
+public abstract class AbstractReader<M extends TypedMetadata, P extends DataPlane<?>>
+  extends AbstractHasContext implements TypedReader<M, P> {
 
   // -- Constants --
 
@@ -99,7 +99,7 @@ public abstract class AbstractReader<M extends Metadata, P extends Plane>
 
   // -- HasFormat API Methods --
 
-  public Format<M, ?, ?, ?, ?> getFormat() {
+  public Format getFormat() {
     return getContext().getFormatFromReader(getClass());
   }
 
@@ -277,7 +277,7 @@ public abstract class AbstractReader<M extends Metadata, P extends Plane>
     if(in == null) setSource(meta.getSource());
     
     try {
-      getFormat().findSourceTranslator(DefaultDatasetMetadata.class).
+      getFormat().findSourceTranslator(dMeta).
         translate(meta, dMeta);
     } catch (FormatException e) {
       LOGGER.debug(e.getMessage());
@@ -365,7 +365,7 @@ public abstract class AbstractReader<M extends Metadata, P extends Plane>
     return dMeta.getPlaneCount(imageIndex);
   }
 
-  public Reader<? extends Metadata, ? extends Plane>[] getUnderlyingReaders() {
+  public Reader[] getUnderlyingReaders() {
     // TODO Auto-generated method stub
     return null;
   }

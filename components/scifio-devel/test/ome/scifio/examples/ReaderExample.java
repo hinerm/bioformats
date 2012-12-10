@@ -8,6 +8,7 @@ import ome.scifio.Metadata;
 import ome.scifio.Parser;
 import ome.scifio.Reader;
 import ome.scifio.SCIFIO;
+import ome.scifio.apng.APNGFormat;
 
 public class ReaderExample {
 

@@ -53,8 +53,8 @@ import ome.scifio.discovery.TranslatorDiscoverer;
  * ome.scifio.Format.
  * 
  */
-public abstract class AbstractFormat<M extends Metadata, C extends Checker<M>, P extends Parser<M>, R extends Reader<M, ? extends Plane>, W extends Writer<M>>
-    extends AbstractHasContext implements Format<M, C, P, R, W> {
+public abstract class AbstractFormat<M extends TypedMetadata, C extends Checker, P extends TypedParser<M>, R extends TypedReader<M, DataPlane<?>>, W extends TypedWriter<M>>
+    extends AbstractHasContext implements TypedFormat<M, C, P, R, W> {
   
   // -- Constants --
 
@@ -75,7 +75,7 @@ public abstract class AbstractFormat<M extends Metadata, C extends Checker<M>, P
   private Class<R> readerClass;
   private Class<W> writerClass;
 
-  private final List<Class<Translator<?, ?>>> translatorClassList = new ArrayList<Class<Translator<?, ?>>>();
+  private final List<Class<? extends Translator>> translatorClassList = new ArrayList<Class<? extends Translator>>();
 
   private final Double priority = 0.0;
 
@@ -169,39 +169,56 @@ public abstract class AbstractFormat<M extends Metadata, C extends Checker<M>, P
   }
 
   /* @see Format#findSourceTranslator() */
-  public <N extends Metadata> Translator<M, N> findSourceTranslator(
-      final Class<N> targetMeta) throws FormatException {
-      return findTranslator(metadataClass, targetMeta);
+  public <N extends TypedMetadata> TypedTranslator<M, N> findSourceTranslator(
+      final N targetMeta) throws FormatException {
+    return findTranslator(metadataClass, getTypedClass(targetMeta));
   }
 
   /* @see Format#findDestTranslator() */
-  public <N extends Metadata> Translator<N, M> findDestTranslator(
-      final Class<N> targetMeta) throws FormatException {
-    return findTranslator(targetMeta, metadataClass);
+  public <N extends TypedMetadata> TypedTranslator<N, M> findDestTranslator(
+      final N targetMeta) throws FormatException {
+    return findTranslator(getTypedClass(targetMeta), metadataClass);
   }
 
   /* @see Format#getTranslatorclassList() */
-  public List<Class<Translator<?, ?>>> getTranslatorClassList() {
+  public List<Class<? extends Translator>> getTranslatorClassList() {
     return translatorClassList;
+  }
+  
+  public <Meta extends Metadata> Meta convert(Metadata meta) {
+    if(!getMetadataClass().isAssignableFrom(meta.getClass())) {
+      throw new IllegalArgumentException("Attempted to convert a Metadata" +
+      		" object not associated with this Format.");
+    }
+    @SuppressWarnings("unchecked")
+    Meta m = (Meta)meta;
+    return m;
   }
 
   // -- Helper Methods --
+  
+  
+  private <N> Class<N> getTypedClass(N in) {
+    @SuppressWarnings("unchecked")
+    Class<N> out = (Class<N>) in.getClass();
+    return out;
+  }
   
   /**
    * Populates the list of Translators associated with this Format
    */
   @SuppressWarnings("unchecked")
-  private List<Class<Translator<?, ?>>> findTranslatorClassList()
+  private List<Class<? extends Translator>> findTranslatorClassList()
       throws FormatException {
-    final List<Class<Translator<?, ?>>> translatorList = new ArrayList<Class<Translator<?, ?>>>();
-    for (@SuppressWarnings("rawtypes")
+    final List<Class<? extends Translator>> translatorList = new ArrayList<Class<? extends Translator>>();
+    for (
     final IndexItem<SCIFIOTranslator, Translator> item : Index.load(
         SCIFIOTranslator.class, Translator.class)) {
       if (metadataClass == item.annotation().metaIn()
           || metadataClass == item.annotation().metaOut()) {
-        Class<Translator<?, ?>> trans;
+        Class<? extends Translator> trans;
         try {
-          trans = (Class<Translator<?, ?>>) Class.forName(item
+          trans = (Class<? extends Translator>) Class.forName(item
               .className());
           translatorList.add(trans);
         } catch (final ClassNotFoundException e) {
@@ -249,18 +266,18 @@ public abstract class AbstractFormat<M extends Metadata, C extends Checker<M>, P
   /*
    * Returns a translator object translating from metaIn to metaOut
    */
-  private <S extends Metadata, T extends Metadata> Translator<S, T> 
+  private <S extends TypedMetadata, T extends TypedMetadata> TypedTranslator<S, T> 
   findTranslator(final Class<S> metaIn, final Class<T> metaOut) throws FormatException {
-    Discoverer<SCIFIOTranslator, Translator<S, T>> disc = 
-        new TranslatorDiscoverer<S, T>(metaIn, metaOut);
-    Translator<S, T> translator = disc.discover().get(0);
+    Discoverer<SCIFIOTranslator, TypedTranslator<S, T>> disc = 
+        new TranslatorDiscoverer<S,T>(metaIn, metaOut);
+    TypedTranslator<S, T> translator = disc.discover().get(0);
     translator.setContext(getContext());
     return translator;
   }
 
   // -- Comparable API Methods --
   
-  public int compareTo(final Format<?, ?, ?, ?, ?> format) {
+  public int compareTo(final Format format) {
     return getPriority().compareTo(format.getPriority());
   }
 }

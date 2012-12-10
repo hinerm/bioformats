@@ -33,7 +33,6 @@
  * policies, either expressed or implied, of any organization.
  * #L%
  */
-
 package ome.scifio;
 
 import java.io.IOException;
@@ -47,7 +46,7 @@ import ome.scifio.io.RandomAccessInputStream;
  * <dd><a href="">Trac</a>,
  * <a href="">Gitweb</a></dd></dl>
  */
-public interface Checker<M extends Metadata> extends HasContext, HasFormat {
+public interface Checker extends HasContext, HasFormat {
 
   // -- Checker API methods --
 

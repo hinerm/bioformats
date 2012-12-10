@@ -33,7 +33,6 @@
  * policies, either expressed or implied, of any organization.
  * #L%
  */
-
 package ome.scifio;
 
 import java.awt.image.ColorModel;
@@ -50,7 +49,7 @@ import ome.scifio.io.RandomAccessOutputStream;
  * <dd><a href="">Trac</a>,
  * <a href="">Gitweb</a></dd></dl>
  */
-public interface Writer<M extends Metadata> extends HasContext, HasFormat {
+public interface Writer extends HasContext, HasFormat {
 
   // -- Writer API methods --
   /**
@@ -62,7 +61,7 @@ public interface Writer<M extends Metadata> extends HasContext, HasFormat {
    * @throws FormatException if one of the parameters is invalid.
    * @throws IOException if there was a problem writing to the file.
    */
-  void saveBytes(final int imageIndex, final int planeIndex, byte[] buf)
+  void savePlane(final int imageIndex, final int planeIndex, Plane buf)
     throws FormatException, IOException;
 
   /**
@@ -78,35 +77,10 @@ public interface Writer<M extends Metadata> extends HasContext, HasFormat {
    * @throws FormatException if one of the parameters is invalid.
    * @throws IOException if there was a problem writing to the file.
    */
-  void saveBytes(final int imageIndex, final int planeIndex, final byte[] buf,
+  void savePlane(final int imageIndex, final int planeIndex, final Plane buf,
     final int x, final int y, final int w, final int h)
     throws FormatException, IOException;
 
-  /**
-   * Saves the given image plane to the current series in the current file.
-   *
-   * @param imageIndex the image index within the file.
-   * @param planeIndex the plane index within the image.   * @param plane the image plane.
-   * @throws FormatException if one of the parameters is invalid.
-   * @throws IOException if there was a problem writing to the file.
-   */
-  void savePlane(int imageIndex, int planeIndex, Object plane)
-    throws FormatException, IOException;
-
-  /**
-   * Saves the given image plane to the current series in the current file.
-   *
-   * @param imageIndex the image index within the file.
-   * @param planeIndex the plane index within the image.   * @param plane the image plane.
-   * @param x the X coordinate of the upper-left corner of the image tile.
-   * @param y the Y coordinate of the upper-left corner of the image tile.
-   * @param w the width (in pixels) of the image tile.
-   * @param h the height (in pixels) of the image tile.
-   * @throws FormatException if one of the parameters is invalid.
-   * @throws IOException if there was a problem writing to the file.
-   */
-  void savePlane(int imageIndex, int planeIndex, Object plane, int x, int y,
-    int w, int h) throws FormatException, IOException;
 
   /** Reports whether the writer can save multiple images to a single file. */
   boolean canDoStacks();
@@ -115,7 +89,7 @@ public interface Writer<M extends Metadata> extends HasContext, HasFormat {
    * Sets the metadata retrieval object from
    * which to retrieve standardized metadata.
    */
-  void setMetadata(M meta) throws FormatException;
+  void setMetadata(Metadata meta) throws FormatException;
 
   /**
    * Retrieves the current metadata retrieval object for this writer. You can
@@ -123,7 +97,7 @@ public interface Writer<M extends Metadata> extends HasContext, HasFormat {
    * metadata retrieval object.
    * @return A metadata retrieval object.
    */
-  M getMetadata();
+  Metadata getMetadata();
 
   /** Gets the core metadata for this Writer. */
   DatasetMetadata<?> getDatasetMetadata();
@@ -230,31 +204,4 @@ public interface Writer<M extends Metadata> extends HasContext, HasFormat {
 
   /** Closes currently open file(s) and frees allocated memory. */
   void close() throws IOException;
-
-  // -- Deprecated methods --
-
-  /** @deprecated Please use saveBytes(int, byte[]) instead. */
-  @Deprecated
-  void saveBytes(byte[] bytes, boolean last)
-    throws FormatException, IOException;
-
-  /**
-   * @deprecated Please use saveBytes(int, byte[]) and setSeries(int) instead.
-   */
-  @Deprecated
-  void saveBytes(byte[] bytes, int planeIndex, boolean lastInSeries,
-    boolean last) throws FormatException, IOException;
-
-  /** @deprecated Please use savePlane(int, Object) instead. */
-  @Deprecated
-  void savePlane(Object plane, boolean last)
-    throws FormatException, IOException;
-
-  /**
-   * @deprecated Please use savePlane(int, Object) and setSeries(int) instead.
-   */
-  @Deprecated
-  void savePlane(Object plane, int planeIndex, boolean lastInSeries,
-    boolean last) throws FormatException, IOException;
-
 }

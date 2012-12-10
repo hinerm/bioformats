@@ -47,8 +47,8 @@ import ome.scifio.util.FormatTools;
  * Abstract superclass of all SCIFIO checker components. 
  *
  */
-public abstract class AbstractChecker<M extends Metadata>
-  extends AbstractHasContext implements Checker<M> {
+public abstract class AbstractChecker
+  extends AbstractHasContext implements Checker {
 
   // -- Constants --
 
@@ -78,8 +78,7 @@ public abstract class AbstractChecker<M extends Metadata>
 
   // -- HasFormat API --
 
-  @SuppressWarnings("unchecked")
-  public Format<M, ?, ?, ?, ?> getFormat() {
+  public Format getFormat() {
     return getContext().getFormatFromChecker(getClass());
   }
 

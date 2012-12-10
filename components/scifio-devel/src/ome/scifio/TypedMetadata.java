@@ -33,40 +33,13 @@
  * policies, either expressed or implied, of any organization.
  * #L%
  */
-package ome.scifio.discovery;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import net.java.sezpoz.Index;
-import net.java.sezpoz.IndexItem;
-import ome.scifio.Format;
-import ome.scifio.FormatException;
+package ome.scifio;
 
 /**
+ * TODO
  * @author Mark Hiner
  *
  */
-public class FormatDiscoverer implements
-    Discoverer<SCIFIOFormat, Format> {
+public interface TypedMetadata extends Metadata {
 
-  // -- Discoverer API Methods --
-  
-  /* Builds a list of all discovered Formats */
-  public List<Format> discover() throws FormatException {
-    
-    final List<Format> formats = new ArrayList<Format>();
-
-    for (final IndexItem<SCIFIOFormat, Format> item : 
-      Index.load(SCIFIOFormat.class, Format.class)) {
-      try {
-        final Format format = item.instance();
-        formats.add(format);
-      } catch (final InstantiationException e) {
-        throw new FormatException(e);
-      }
-    }
-
-    return formats;
-  }
 }

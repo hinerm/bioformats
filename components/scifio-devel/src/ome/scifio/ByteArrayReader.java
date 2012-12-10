@@ -35,7 +35,7 @@
  */
 package ome.scifio;
 
-public abstract class ByteArrayReader<M extends Metadata>
+public abstract class ByteArrayReader<M extends TypedMetadata>
   extends AbstractReader<M, ByteArrayPlane> {
 
   // -- Constructor --

@@ -47,6 +47,6 @@ public interface HasFormat {
   /**
    * Provides a link back to the format associated with this component.
    */
-  Format<?, ?, ?, ?, ?> getFormat();
+  Format getFormat();
 
 }

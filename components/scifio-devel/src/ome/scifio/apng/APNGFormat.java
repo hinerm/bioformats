@@ -214,7 +214,7 @@ public class APNGFormat
    * (APNG) images.
    *
    */
-  public static class Checker extends AbstractChecker<Metadata> {
+  public static class Checker extends AbstractChecker {
   
     // -- Fields --
   

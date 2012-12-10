@@ -33,40 +33,27 @@
  * policies, either expressed or implied, of any organization.
  * #L%
  */
-package ome.scifio.discovery;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import net.java.sezpoz.Index;
-import net.java.sezpoz.IndexItem;
-import ome.scifio.Format;
-import ome.scifio.FormatException;
+package ome.scifio;
 
 /**
+ * TODO
  * @author Mark Hiner
  *
+ * @param <M>
  */
-public class FormatDiscoverer implements
-    Discoverer<SCIFIOFormat, Format> {
+public interface TypedWriter<M extends TypedMetadata> extends Writer {
 
-  // -- Discoverer API Methods --
-  
-  /* Builds a list of all discovered Formats */
-  public List<Format> discover() throws FormatException {
-    
-    final List<Format> formats = new ArrayList<Format>();
+  /**
+   * Sets the metadata retrieval object from
+   * which to retrieve standardized metadata.
+   */
+  void setMetadata(M meta) throws FormatException;
 
-    for (final IndexItem<SCIFIOFormat, Format> item : 
-      Index.load(SCIFIOFormat.class, Format.class)) {
-      try {
-        final Format format = item.instance();
-        formats.add(format);
-      } catch (final InstantiationException e) {
-        throw new FormatException(e);
-      }
-    }
-
-    return formats;
-  }
+  /**
+   * Retrieves the current metadata retrieval object for this writer. You can
+   * be assured that this method will <b>never</b> return a <code>null</code>
+   * metadata retrieval object.
+   * @return A metadata retrieval object.
+   */
+  M getMetadata();
 }

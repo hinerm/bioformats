@@ -33,40 +33,26 @@
  * policies, either expressed or implied, of any organization.
  * #L%
  */
-package ome.scifio.discovery;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import net.java.sezpoz.Index;
-import net.java.sezpoz.IndexItem;
-import ome.scifio.Format;
-import ome.scifio.FormatException;
+package ome.scifio;
 
 /**
+ * TODO
+ * 
  * @author Mark Hiner
  *
+ * @param <M>
+ * @param <N>
  */
-public class FormatDiscoverer implements
-    Discoverer<SCIFIOFormat, Format> {
+public interface TypedTranslator<M extends TypedMetadata, N extends TypedMetadata> extends Translator {
 
-  // -- Discoverer API Methods --
-  
-  /* Builds a list of all discovered Formats */
-  public List<Format> discover() throws FormatException {
-    
-    final List<Format> formats = new ArrayList<Format>();
-
-    for (final IndexItem<SCIFIOFormat, Format> item : 
-      Index.load(SCIFIOFormat.class, Format.class)) {
-      try {
-        final Format format = item.instance();
-        formats.add(format);
-      } catch (final InstantiationException e) {
-        throw new FormatException(e);
-      }
-    }
-
-    return formats;
-  }
+  /**
+   * Uses the type M Metadata object to build an instance of Metadata type N
+   * 
+   * Note that N does not have to be a blank Metadata object, but such can be
+   * ensured by calling the reset() method ahead of time.
+   * 
+   * @param metaIn Metadata object of the Input type
+   * @return a new Metadtata object
+   */
+  void translate(final M source, final N destination);
 }

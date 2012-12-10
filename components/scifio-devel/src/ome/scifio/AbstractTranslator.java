@@ -43,8 +43,8 @@ import org.slf4j.LoggerFactory;
  * Abstract superclass of all SCIFIO Translator components.
  *
  */
-public abstract class AbstractTranslator<M extends Metadata, N extends Metadata>
-  extends AbstractHasContext implements Translator<M, N> {
+public abstract class AbstractTranslator<M extends TypedMetadata, N extends TypedMetadata>
+  extends AbstractHasContext implements TypedTranslator<M, N> {
 
   public AbstractTranslator(final SCIFIO ctx) {
     super(ctx);
@@ -70,8 +70,7 @@ public abstract class AbstractTranslator<M extends Metadata, N extends Metadata>
 
   // -- HasFormat API Methods --
 
-  @SuppressWarnings("unchecked")
-  public Format<M, ?, ?, ?, ?> getFormat() {
+  public Format getFormat() {
     return getContext().getFormatFromTranslator(getClass());
   }
 }

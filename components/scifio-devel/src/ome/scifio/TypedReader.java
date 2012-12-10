@@ -33,38 +33,35 @@
  * policies, either expressed or implied, of any organization.
  * #L%
  */
-
 package ome.scifio;
 
-import java.io.File;
 import java.io.IOException;
 
 import ome.scifio.io.RandomAccessInputStream;
 
 /**
- * Interface for all SCIFIO Readers.
+ * TODO
+ * @author Mark Hiner
  *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="">Trac</a>,
- * <a href="">Gitweb</a></dd></dl>
- * 
+ * @param <M> - {@link ome.scifio.Metadata} used by this reader for reading images.
+ * @param <P> - {@link ome.scifio.Plane} type returned by this reader.
+ * @param <T> - data type for {@code Planes} returned by this reader. 
  */
-public interface Reader extends HasContext, HasFormat {
+public interface TypedReader<M extends TypedMetadata, P extends DataPlane<?>> extends Reader {
 
-  // -- Reader API methods --
 
   /**
    * Obtains the specified image plane from the current file as a byte array.
    * @see #openPlane(int, int, P)
    */
-  Plane openPlane(int imageIndex, int planeIndex)
+  P openPlane(int imageIndex, int planeIndex)
     throws FormatException, IOException;
 
   /**
    * Obtains a sub-image of the specified image plane,
    * whose upper-left corner is given by (x, y).
    */
-  Plane openPlane(int imageIndex, int planeIndex, int x, int y, int w, int h)
+  P openPlane(int imageIndex, int planeIndex, int x, int y, int w, int h)
     throws FormatException, IOException;
 
   /**
@@ -80,7 +77,7 @@ public interface Reader extends HasContext, HasFormat {
    *   file.
    * @throws IOException if there was a problem reading the file.
    */
-  Plane openPlane(int imageIndex, int planeIndex, Plane plane)
+  P openPlane(int imageIndex, int planeIndex, P plane)
     throws FormatException, IOException;
 
   /**
@@ -97,112 +94,28 @@ public interface Reader extends HasContext, HasFormat {
    *   file.
    * @throws IOException if there was a problem reading the file.
    */
-  Plane openPlane(int imageIndex, int planeIndex, Plane plane, int x, int y,
+  P openPlane(int imageIndex, int planeIndex, P plane, int x, int y,
     int w, int h) throws FormatException, IOException;
 
   /**
    * Obtains a thumbnail for the specified image plane from the current file.
    */
-  Plane openThumbPlane(int imageIndex, int planeIndex)
+  P openThumbPlane(int imageIndex, int planeIndex)
     throws FormatException, IOException;
+  
+  /** Reads a raw plane from disk. */
+  P readPlane(RandomAccessInputStream s, int imageIndex, int x, int y,
+    int w, int h, P plane) throws IOException;
 
-  /** Specifies whether or not to force grouping in multi-file formats. */
-  void setGroupFiles(boolean group);
-
-  /** Returns true if we should group files in multi-file formats.*/
-  boolean isGroupFiles();
-
-  /**
-   * Returns an int indicating that we cannot, must, or might group the files
-   * in a given dataset.
-   */
-  int fileGroupOption(String id) throws FormatException, IOException;
-
-  /** Returns the current file. */
-  String getCurrentFile();
-
-  /** Returns the list of domains represented by the current file. */
-  String[] getDomains();
-
-  /**
-   * Retrieves the current input stream for this reader.
-   * @return A RandomAccessInputStream
-   */
-  RandomAccessInputStream getStream();
-
-  /**
-   * Retrieves all underlying readers.
-   * Returns null if there are no underlying readers.
-   */
-  Reader[] getUnderlyingReaders();
-
-  /** Returns the optimal sub-image width for use with {@link #openPlane}. */
-  int getOptimalTileWidth(int imageIndex);
-
-  /** Returns the optimal sub-image height for use with {@link #openPlane}. */
-  int getOptimalTileHeight(int imageIndex);
-
+  /** Reads a raw plane from disk. */
+  P readPlane(RandomAccessInputStream s, int imageIndex, int x, int y,
+    int w, int h, int scanlinePad, P plane) throws IOException;
+  
   /** Sets the Metadata for this Reader */
-  void setMetadata(Metadata meta) throws IOException;
+  void setMetadata(M meta) throws IOException;
 
   /** Gets the type-specific Metadata for this Reader */
-  Metadata getMetadata();
-
-  /** Gets the core metadata for this Reader. */
-  DatasetMetadata<?> getDatasetMetadata();
-
-  //TODO remove normalization methods
-  /** Specifies whether or not to normalize float data. */
-  void setNormalized(boolean normalize);
-
-  /** Returns true if we should normalize float data. */
-  boolean isNormalized();
-
-  /** Returns true if this format supports multi-file datasets. */
-  boolean hasCompanionFiles();
-
-  /**
-   * Sets the source for this reader to read from.
-   * @param file
-   * @throws IOException 
-   */
-  void setSource(File file) throws IOException;
-
-  /**
-   * Sets the source for this reader to read from.
-   * @param fileName
-   * @throws IOException 
-   */
-  void setSource(String fileName) throws IOException;
-
-  /**
-   * Sets the source for this reader to read from.
-   * @param in
-   */
-  void setSource(RandomAccessInputStream stream) throws IOException;
-
-  /**
-   * Closes the currently open file. If the flag is set, this is all that
-   * happens; if unset, it is equivalent to calling
-   */
-  void close(boolean fileOnly) throws IOException;
-
-  /** Closes currently open file(s) and frees allocated memory. */
-  void close() throws IOException;
-
-  /** Reads a raw plane from disk. */
-  Plane readPlane(RandomAccessInputStream s, int imageIndex, int x, int y,
-    int w, int h, Plane plane) throws IOException;
-
-  /** Reads a raw plane from disk. */
-  Plane readPlane(RandomAccessInputStream s, int imageIndex, int x, int y,
-    int w, int h, int scanlinePad, Plane plane) throws IOException;
-
-  /** Determines the number of planes in the current file. */
-  int getPlaneCount(int imageIndex);
-
-  /** Determines the number of images in the current file. */
-  int getImageCount();
+  M getMetadata();
   
   /** 
    * Creates a blank plane compatible with this reader.
@@ -212,5 +125,5 @@ public interface Reader extends HasContext, HasFormat {
    * @param yLength
    * @return
    */
-  Plane createPlane(int xOffset, int yOffset, int xLength, int yLength);
+  P createPlane(int xOffset, int yOffset, int xLength, int yLength);
 }

@@ -40,8 +40,8 @@ import java.awt.image.BufferedImage;
 
 import ome.scifio.AbstractReader;
 import ome.scifio.BufferedImagePlane;
-import ome.scifio.Metadata;
 import ome.scifio.SCIFIO;
+import ome.scifio.TypedMetadata;
 
 /**
  * BufferedImageReader is the superclass for file format readers
@@ -53,7 +53,7 @@ import ome.scifio.SCIFIO;
  *
  * @author Curtis Rueden ctrueden at wisc.edu
  */
-public abstract class BufferedImageReader<M extends Metadata>
+public abstract class BufferedImageReader<M extends TypedMetadata>
   extends AbstractReader<M, BufferedImagePlane> {
   // -- Constructors --
 
